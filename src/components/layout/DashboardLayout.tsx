@@ -1,3 +1,5 @@
+'use client'
+
 import Sidebar, { type SidebarItem } from './Sidebar'
 import {
   LayoutDashboard,
