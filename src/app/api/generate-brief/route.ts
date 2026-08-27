@@ -1,43 +1,34 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
-  try {
-    const { productContext } = await req.json()
+export async function POST(req: NextRequest) {
+  const { title, category, description, duration, videoCount, productContext } = await req.json()
 
-    if (!productContext) {
-      return NextResponse.json({ error: 'Missing product context' }, { status: 400 })
-    }
+  const context = productContext ||
+    `Title: ${title}, Objective: ${category}, Description: ${description}, Deliverables: ${videoCount}x ${duration} videos.`
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Missing Gemini API key' }, { status: 500 })
-    }
+  const prompt = `Write a professional UGC creative brief for this campaign:
+${context}
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: 'You are an expert UGC (User Generated Content) strategist. Given the following context about a product or campaign, write a concise, highly-actionable creative brief for creators. Include specific talking points, visual hooks, and do\'s and don\'ts. Format it cleanly without markdown code blocks, just text.\n\nContext: ' + productContext
-          }]
-        }]
-      })
-    })
+Include:
+- 3 hook ideas (opening lines that grab attention)
+- Key talking points (what creators must mention)
+- Visual requirements (lighting, setting, style)
+- Do's and Don'ts
+- CTA script (what to say at the end)
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error('Gemini API Error: ' + errorText)
-    }
+Use bullet points. Be specific and actionable. 200-300 words.`
 
-    const data = await response.json()
-    const brief = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  const apiKey = process.env.GEMINI_API_KEY
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
 
-    return NextResponse.json({ brief })
-  } catch (error: any) {
-    console.error('Error generating brief:', error)
-    return NextResponse.json({ error: 'Failed to generate brief' }, { status: 500 })
-  }
+  const res = await fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+  })
+
+  const data = await res.json()
+  const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+
+  return NextResponse.json({ brief: text })
 }

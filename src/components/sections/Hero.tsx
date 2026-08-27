@@ -1,12 +1,28 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Globe } from 'lucide-react'
 import { useRoleModal } from '@/components/ui/RoleModal'
+import { useAuth } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 export default function Hero() {
   const { open: openRoleModal } = useRoleModal()
+  const { userId } = useAuth()
+  const router = useRouter()
+  const [url, setUrl] = useState('')
+
+  const handleLaunch = () => {
+    if (!userId) {
+      openRoleModal()
+    } else if (url.trim()) {
+      router.push('/dashboard/campaigns/new?url=' + encodeURIComponent(url.trim()))
+    } else {
+      openRoleModal()
+    }
+  }
 
   return (
     <section
@@ -40,8 +56,8 @@ export default function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-5 max-w-[600px] text-[17px] leading-relaxed text-[rgba(32,32,32,0.6)]"
           >
-            Post a brief, set your budget, and let the top UGC creators come to you.
-            No cold outreach. No agencies. Just results.
+            Drop your website URL and AI builds your entire campaign in 60 seconds.
+            Post a brief, set your budget, and let top UGC creators come to you.
           </motion.p>
 
           <motion.div
@@ -50,21 +66,26 @@ export default function Hero() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mt-8 w-full"
           >
-            <div className="mx-auto flex max-w-[520px] items-center rounded-full border border-[rgba(32,32,32,0.15)] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.08)] p-1.5 pl-4">
-              <Globe className="h-5 w-5 text-gray-400" />
+            <div className="mx-auto flex max-w-[540px] items-center rounded-full border border-[rgba(32,32,32,0.15)] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.08)] p-1.5 pl-4">
+              <Globe className="h-5 w-5 text-gray-400 shrink-0" />
               <input
-                type="text"
-                placeholder="Enter your email to start..."
+                type="url"
+                value={url}
+                onChange={e => setUrl(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleLaunch()}
+                placeholder="Enter your website URL..."
                 className="flex-1 bg-transparent px-3 text-[#202020] outline-none placeholder:text-[rgba(32,32,32,0.4)] text-[15px]"
-                disabled
               />
               <button
-                onClick={openRoleModal}
-                className="rounded-full bg-[#202020] px-5 py-2.5 text-[14px] font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-95 cursor-pointer"
+                onClick={handleLaunch}
+                className="rounded-full bg-[#202020] px-5 py-2.5 text-[14px] font-bold text-white transition-all duration-200 hover:opacity-90 active:scale-95 cursor-pointer whitespace-nowrap"
               >
                 Launch campaign
               </button>
             </div>
+            <p className="mt-2 text-[12px] text-[rgba(32,32,32,0.4)] text-center">
+              ✨ AI scans your site and auto-generates a campaign brief in seconds
+            </p>
           </motion.div>
 
           <motion.p

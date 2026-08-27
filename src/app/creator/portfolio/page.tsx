@@ -1,51 +1,109 @@
-import { Plus, Video, Play, ExternalLink } from 'lucide-react'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
+import { useAuth } from '@clerk/nextjs'
+import type { Database } from '@/types/database'
+import { Plus, ExternalLink, Grid } from 'lucide-react'
 
 export default function PortfolioPage() {
-  // Mock portfolio data since we don't have a portfolio table yet
-  const portfolio = [
-    { id: 1, title: 'Summer Skincare Routine', type: 'TikTok', views: '45.2K', image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=500&q=80' },
-    { id: 2, title: 'Tech Unboxing: New Headphones', type: 'YouTube Shorts', views: '120K', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80' },
-    { id: 3, title: 'Morning Coffee Recipe', type: 'Instagram Reel', views: '12K', image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=500&q=80' },
-  ]
+  const { userId } = useAuth()
+  const [items, setItems] = useState<string[]>([])
+  const [showInput, setShowInput] = useState(false)
+  const [newUrl, setNewUrl] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [creatorProfileId, setCreatorProfileId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!userId) return
+    const supabase = createBrowserClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    async function load() {
+      const { data: profile } = await (supabase as any)
+        .from('profiles')
+        .select('id, creator_profiles(id, portfolio_items)')
+        .eq('user_id', userId)
+        .single()
+      if (profile?.creator_profiles?.[0]) {
+        setCreatorProfileId(profile.creator_profiles[0].id)
+        setItems(profile.creator_profiles[0].portfolio_items || [])
+      }
+      setLoading(false)
+    }
+    load()
+  }, [userId])
+
+  const handleAdd = async () => {
+    if (!newUrl.trim() || !creatorProfileId) return
+    const updated = [...items, newUrl.trim()]
+    setItems(updated)
+    setNewUrl('')
+    setShowInput(false)
+    const supabase = createBrowserClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    await (supabase as any).from('creator_profiles').update({ portfolio_items: updated }).eq('id', creatorProfileId)
+  }
 
   return (
-    <div className="p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div className="p-8 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#202020]">Portfolio</h1>
-          <p className="text-sm text-gray-500 mt-1">Showcase your best performing content to brands.</p>
+          <p className="text-sm text-gray-500 mt-1">Showcase your best content to brands.</p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-[#202020] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-black/90 transition-colors">
-          <Plus className="w-4 h-4" /> Add Item
+        <button
+          onClick={() => setShowInput(true)}
+          className="flex items-center gap-2 bg-[#202020] text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-black/90 transition-colors"
+        >
+          <Plus className="h-4 w-4" /> Add Item
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {portfolio.map(item => (
-          <div key={item.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm group">
-            <div className="relative aspect-[9/16] bg-gray-100 overflow-hidden">
-              <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center shadow-lg">
-                  <Play className="w-5 h-5 text-white fill-white" />
-                </div>
-              </div>
-              <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-2 py-1 rounded-md flex items-center gap-1.5">
-                <Video className="w-3 h-3" /> {item.type}
-              </div>
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-[#202020] mb-1 line-clamp-1">{item.title}</h3>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500 font-medium">{item.views} views</span>
-                <button className="text-[#3C83F9] font-medium hover:underline flex items-center gap-1">
-                  View <ExternalLink className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
+      {showInput && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex gap-3">
+          <input
+            autoFocus
+            type="url"
+            value={newUrl}
+            onChange={e => setNewUrl(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+            placeholder="Paste TikTok, Instagram, or YouTube URL..."
+            className="flex-1 h-10 px-3 rounded-lg border border-gray-200 outline-none focus:border-gray-400 text-sm"
+          />
+          <button onClick={handleAdd} className="bg-[#202020] text-white px-4 rounded-lg text-sm font-bold">Add</button>
+          <button onClick={() => setShowInput(false)} className="text-gray-400 hover:text-black px-2 text-sm">Cancel</button>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="text-center py-16 text-gray-500 text-sm">Loading...</div>
+      ) : items.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-gray-200 rounded-2xl">
+          <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+            <Grid className="h-7 w-7 text-gray-400" />
           </div>
-        ))}
-      </div>
+          <p className="font-semibold text-[#202020]">No portfolio items yet</p>
+          <p className="text-sm text-gray-500 mt-1">Add links to your TikTok, Instagram, or YouTube videos.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((url, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 flex items-start gap-3 hover:border-gray-300 transition-colors">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[#202020] truncate">Item {i + 1}</p>
+                <p className="text-xs text-gray-500 truncate mt-0.5">{url}</p>
+              </div>
+              <a href={url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#3C83F9] transition-colors">
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
