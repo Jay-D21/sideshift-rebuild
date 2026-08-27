@@ -1,10 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { FadeUp } from '@/components/ui/fade-up'
 import { Check, Info } from 'lucide-react'
-import Link from 'next/link'
+import { useRoleModal } from '@/components/ui/RoleModal'
 import {
   Accordion,
   AccordionContent,
@@ -15,8 +16,7 @@ import {
 const tiers = [
   {
     name: 'Starter',
-    price: '$199',
-    interval: '/mo',
+    price: { monthly: '$199', annual: '$1,910' },
     desc: 'Perfect for small brands running their first UGC campaigns.',
     features: [
       'Post 1 active campaign',
@@ -29,8 +29,7 @@ const tiers = [
   },
   {
     name: 'Growth',
-    price: '$399',
-    interval: '/mo',
+    price: { monthly: '$399', annual: '$3,830' },
     desc: 'For growing brands scaling their content production.',
     features: [
       'Post up to 5 active campaigns',
@@ -44,8 +43,7 @@ const tiers = [
   },
   {
     name: 'Scale',
-    price: '$999',
-    interval: '/mo',
+    price: { monthly: '$999', annual: '$9,590' },
     desc: 'For enterprises and agencies managing multiple brands.',
     features: [
       'Unlimited campaigns',
@@ -75,20 +73,41 @@ const faqs = [
 ]
 
 export default function PricingPage() {
+  const [isAnnual, setIsAnnual] = useState(false)
+  const { open: openRoleModal } = useRoleModal()
+
   return (
     <>
       <Navbar />
       <main className="flex min-h-screen flex-col pt-24 pb-20 bg-white">
         
         {/* Header */}
-        <section className="px-4 text-center max-w-3xl mx-auto mb-16">
+        <section className="px-4 text-center max-w-3xl mx-auto mb-12">
           <FadeUp>
             <h1 className="text-4xl md:text-6xl font-bold text-[#202020] tracking-tight mb-6">
               Simple, transparent pricing
             </h1>
             <p className="text-lg" style={{ color: 'rgba(32,32,32,0.75)' }}>
-              No platform fees on creator payouts. Pay a flat monthly rate and scale your UGC production.
+              No platform fees on creator payouts. Pay a flat rate and scale your UGC production.
             </p>
+          </FadeUp>
+        </section>
+
+        {/* Toggle */}
+        <section className="flex justify-center mb-16">
+          <FadeUp>
+            <div className="flex items-center justify-center gap-3">
+              <span className={`text-sm font-medium ${!isAnnual ? 'text-[#202020]' : 'text-gray-500'}`}>Monthly</span>
+              <button 
+                onClick={() => setIsAnnual(!isAnnual)}
+                className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#202020] transition-colors"
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+              <span className={`text-sm font-medium flex items-center gap-1.5 ${isAnnual ? 'text-[#202020]' : 'text-gray-500'}`}>
+                Annually <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Save 20%</span>
+              </span>
+            </div>
           </FadeUp>
         </section>
 
@@ -106,11 +125,15 @@ export default function PricingPage() {
                   <h3 className="text-2xl font-bold text-[#202020] mb-2">{tier.name}</h3>
                   <p className="text-sm h-10 mb-6" style={{ color: 'rgba(32,32,32,0.55)' }}>{tier.desc}</p>
                   <div className="mb-8">
-                    <span className="text-5xl font-bold text-[#202020]">{tier.price}</span>
-                    <span className="text-gray-500">{tier.interval}</span>
+                    <span className="text-5xl font-bold text-[#202020]">
+                      {isAnnual ? tier.price.annual : tier.price.monthly}
+                    </span>
+                    <span className="text-gray-500">
+                      {isAnnual ? '/yr' : '/mo'}
+                    </span>
                   </div>
-                  <Link
-                    href="/signup/brand"
+                  <button
+                    onClick={openRoleModal}
                     className={`block text-center w-full rounded-full py-3 font-bold transition-all ${
                       tier.popular 
                         ? 'bg-[#202020] text-white hover:bg-black/80' 
@@ -118,7 +141,7 @@ export default function PricingPage() {
                     }`}
                   >
                     {tier.cta}
-                  </Link>
+                  </button>
                   
                   <div className="mt-8 flex-1">
                     <p className="text-sm font-bold text-[#202020] mb-4">What's included:</p>
@@ -148,10 +171,18 @@ export default function PricingPage() {
                 </p>
               </div>
               <div className="flex-shrink-0 text-center md:text-right">
-                <div className="text-3xl font-bold text-[#202020] mb-3">$19.99<span className="text-base font-normal text-gray-500">/mo</span></div>
-                <Link href="/signup/creator" className="inline-block bg-white text-[#202020] font-bold py-2.5 px-6 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">
+                <div className="text-3xl font-bold text-[#202020] mb-3">
+                  {isAnnual ? '$190' : '$19.99'}
+                  <span className="text-base font-normal text-gray-500">
+                    {isAnnual ? '/yr' : '/mo'}
+                  </span>
+                </div>
+                <button 
+                  onClick={openRoleModal}
+                  className="inline-block bg-white text-[#202020] font-bold py-2.5 px-6 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
                   Upgrade to Pro
-                </Link>
+                </button>
               </div>
             </div>
           </FadeUp>

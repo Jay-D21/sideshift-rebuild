@@ -1,79 +1,52 @@
-'use client'
-
 import { FadeUp } from '@/components/ui/fade-up'
 
-const testimonials = [
+const quotes = [
   {
-    quote:
-      "We went from spending 3 weeks finding creators to getting 80 qualified applications in 48 hours. CreatorFlow completely changed how we run UGC campaigns.",
-    name: 'Sarah Chen',
-    role: 'Head of Marketing',
-    company: 'Replit',
-    rating: 5,
+    text: 'We ran a campaign with 12 creators in the first week. The content quality blew us away — better than anything our agency had delivered in 6 months.',
+    author: 'Priya L.',
+    role: 'Brand Director, Grammarly',
+    gradient: 'from-blue-400 to-indigo-500',
   },
   {
-    quote:
-      "The quality of creators on CreatorFlow is unmatched. Every applicant had relevant experience and a real audience. Our ROAS tripled in Q3.",
-    name: 'Marcus Rivera',
-    role: 'Growth Lead',
-    company: 'Kalshi',
-    rating: 5,
+    text: "CreatorFlow replaced our entire outbound influencer process. Creators apply to us now. It's completely changed how we think about UGC at scale.",
+    author: 'James M.',
+    role: 'Growth Lead, Cursor',
+    gradient: 'from-emerald-400 to-teal-500',
   },
   {
-    quote:
-      "Finally, a platform that puts brands in control. The inbound model means we only talk to creators who actually want to work with us. Game changer.",
-    name: 'Priya Patel',
-    role: 'VP Brand Partnerships',
-    company: 'Picsart',
-    rating: 5,
+    text: 'Within 24 hours of posting our brief, we had 60+ applications from creators who matched our exact niche. The pipeline view alone is worth the subscription.',
+    author: 'Sarah K.',
+    role: 'Head of Marketing, Brex',
+    gradient: 'from-orange-400 to-pink-500',
   },
 ]
 
 export default function Testimonials() {
   return (
-    <section
-      className="py-20 px-4"
-      style={{
-        background:
-          'linear-gradient(180deg, #FFFFFF 0%, #E0F5FF 30%, #D0EDFF 50%, #E0F5FF 70%, #FFFFFF 100%)',
-      }}
-    >
-      <div className="mx-auto max-w-5xl">
+    <section className="py-20 px-4 bg-white">
+      <div className="mx-auto max-w-6xl">
         <FadeUp className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-[#202020] md:text-4xl">
-            Brands love CreatorFlow
-          </h2>
+          <h2 className="text-3xl font-bold text-[#202020] md:text-4xl">Brands love CreatorFlow</h2>
           <p className="mt-3 text-[15px] leading-[145%]" style={{ color: 'rgba(32,32,32,0.55)' }}>
-            Don&apos;t take our word for it.
+            Real results from real campaigns.
           </p>
         </FadeUp>
 
-        <div className="grid gap-5 md:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <FadeUp key={t.name} delay={i * 0.1} className="h-full">
-              <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white/70 p-6 shadow-sm backdrop-blur-sm transition-transform hover:-translate-y-0.5">
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.rating }).map((_, j) => (
-                    <span key={j} className="text-[#f59e0b] text-base">★</span>
-                  ))}
-                </div>
-                {/* Quote */}
-                <p className="flex-1 text-[15px] leading-[145%] text-[#202020] mb-5">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                {/* Author */}
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white"
-                    style={{ background: ['#3C83F9', '#10b981', '#8b5cf6'][i] }}
-                  >
-                    {t.name.split(' ').map((n) => n[0]).join('')}
-                  </div>
-                  <div>
-                    <div className="text-[14px] font-bold text-[#202020]">{t.name}</div>
-                    <div className="text-[12px]" style={{ color: 'rgba(32,32,32,0.55)' }}>
-                      {t.role} · {t.company}
+        <div className="grid md:grid-cols-3 gap-6">
+          {quotes.map((q, i) => (
+            <FadeUp key={q.author} delay={i * 0.1}>
+              <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-7 hover:-translate-y-0.5 transition-transform duration-200 flex flex-col">
+                {/* Giant decorative quote mark */}
+                <div className="text-[100px] font-bold text-[#E0F5FF] leading-none absolute top-2 left-5 select-none pointer-events-none">&ldquo;</div>
+                <div className="relative z-10">
+                  <p className="text-[15px] leading-[160%] italic text-[#202020] mb-6 pt-6">{q.text}</p>
+                  <div className="flex items-center gap-3 mt-auto">
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${q.gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                      {q.author.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-[#202020]">{q.author}</div>
+                      <div className="text-xs" style={{ color: 'rgba(32,32,32,0.55)' }}>{q.role}</div>
                     </div>
                   </div>
                 </div>

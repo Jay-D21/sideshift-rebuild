@@ -1,7 +1,8 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
+import { RoleModalProvider } from '@/components/ui/RoleModal'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,7 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col bg-white text-[#202020] font-sans">
         <ClerkProvider>
-          {children}
+          <RoleModalProvider>
+            {children}
+          </RoleModalProvider>
         </ClerkProvider>
       </body>
     </html>

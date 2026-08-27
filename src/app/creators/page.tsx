@@ -1,10 +1,27 @@
+'use client'
+
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { FadeUp } from '@/components/ui/fade-up'
-import { CheckCircle, DollarSign, Search, Star, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
+import { ArrowRight, DollarSign, Zap, Clock, CreditCard, Star } from 'lucide-react'
+import { useRoleModal } from '@/components/ui/RoleModal'
+
+const features = [
+  { icon: DollarSign, title: 'Choose Your Niches', desc: 'Tell us what you create — Tech, Beauty, Fitness, Gaming, and more. We surface campaigns that match your style.' },
+  { icon: Zap, title: 'Set Your Rate', desc: 'You control your pricing. Set a minimum per-video rate and only see campaigns that meet your threshold.' },
+  { icon: Clock, title: 'Apply in Minutes', desc: 'Browse active campaigns, write a quick pitch, and hit Apply. No lengthy onboarding. No gatekeeping.' },
+  { icon: CreditCard, title: 'Get Paid Fast', desc: 'Once your content is approved, payment is released automatically. No chasing invoices. No net-30 delays.' },
+]
+
+const steps = [
+  { num: 1, title: 'Browse Jobs', desc: 'Filter campaigns by niche, rate, and brand. Apply to the ones that excite you.' },
+  { num: 2, title: 'Create Content', desc: 'Make your best video following the brief. Submit for review directly in the app.' },
+  { num: 3, title: 'Get Paid', desc: 'Payment releases automatically when your content is approved. No delays.' },
+]
 
 export default function CreatorsPage() {
+  const { open: openRoleModal } = useRoleModal()
+
   return (
     <>
       <Navbar />
@@ -12,137 +29,135 @@ export default function CreatorsPage() {
         {/* Hero */}
         <section
           className="relative flex min-h-[75vh] flex-col items-center justify-center px-4 pt-24 pb-16 text-center"
-          style={{
-            background: 'linear-gradient(180deg, #E0F5FF 0%, #F0FAFF 44.95%, #FFFFFF 100%)',
-          }}
+          style={{ background: 'linear-gradient(180deg, #E0F5FF 0%, #F0FAFF 44.95%, #FFFFFF 100%)' }}
         >
           <FadeUp>
-            <h1 className="mx-auto max-w-4xl text-[10vw] leading-[95%] font-bold tracking-[-0.05em] text-[#202020] sm:text-[52px] md:text-[64px]">
-              Earn money creating content for top brands
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/70 px-3.5 py-1.5 shadow-sm backdrop-blur-sm">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[#3C83F9]" />
+              <span className="text-[13px] font-medium text-[#202020]">1,000,000+ creators earning monthly</span>
+            </div>
+            <h1 className="mx-auto max-w-4xl text-[10vw] leading-[95%] font-bold tracking-[-0.05em] text-[#202020] sm:text-[52px] md:text-[64px] mt-4">
+              Earn $200&ndash;$2,000{' '}
+              <span className="relative inline-block">
+                <span className="relative z-10">per campaign</span>
+                <span className="absolute inset-x-0 bottom-1 h-3 -z-0 rounded" style={{ background: '#fdf1c7' }} />
+              </span>
             </h1>
-            <p
-              className="mx-auto mt-6 max-w-xl text-[15px] leading-[145%] sm:text-lg"
-              style={{ color: 'rgba(32,32,32,0.75)' }}
-            >
-              Get paid to make TikToks, Reels, and Shorts for brands you love. 
+            <p className="mx-auto mt-6 max-w-xl text-[15px] leading-[145%] sm:text-lg" style={{ color: 'rgba(32,32,32,0.75)' }}>
+              Get paid to make TikToks, Reels, and Shorts for brands you love.
               Keep 100% of your rate. No platform fees.
             </p>
             <div className="mt-8 flex justify-center">
-              <Link
-                href="/signup/creator"
-                className="flex items-center gap-2 rounded-full bg-[#202020] border border-[#202020] text-white px-8 py-4 text-base font-bold leading-[140%] whitespace-nowrap transition-all active:scale-95 hover:opacity-90"
+              <button
+                onClick={openRoleModal}
+                className="flex items-center gap-2 rounded-full bg-[#202020] border border-[#202020] text-white px-8 py-4 text-base font-bold leading-[140%] whitespace-nowrap transition-all duration-200 active:scale-95 hover:opacity-90 cursor-pointer"
               >
-                Join Free
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+                Join Free <ArrowRight className="w-5 h-5" />
+              </button>
             </div>
           </FadeUp>
         </section>
 
-        {/* How It Works */}
-        <section className="py-20 px-4 bg-white">
-          <div className="mx-auto max-w-5xl">
-            <FadeUp className="text-center mb-14">
-              <h2 className="text-3xl font-bold text-[#202020] md:text-4xl">
-                How it works for creators
-              </h2>
-            </FadeUp>
-            <div className="grid gap-6 md:grid-cols-3">
+        {/* Earnings stats */}
+        <section className="py-12 px-4 bg-white border-b border-gray-100">
+          <div className="mx-auto max-w-4xl">
+            <div className="grid grid-cols-3 gap-6 text-center">
               {[
-                { icon: Search, title: 'Browse Jobs', desc: 'Find hundreds of new campaign briefs posted daily by top brands.' },
-                { icon: Star, title: 'Create Content', desc: 'Shoot the content from your phone following the brand\'s creative guidelines.' },
-                { icon: DollarSign, title: 'Get Paid', desc: 'Get paid directly to your bank account within 48 hours of approval.' },
-              ].map((step, i) => {
-                const Icon = step.icon
-                return (
-                  <FadeUp key={step.title} delay={i * 0.1}>
-                    <div className="flex flex-col items-center text-center p-6 rounded-lg border border-gray-100 shadow-sm hover:-translate-y-1 transition-transform">
-                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E0F5FF]">
-                        <Icon className="h-6 w-6 text-[#3C83F9]" />
-                      </div>
-                      <h3 className="text-xl font-bold text-[#202020] mb-2">{step.title}</h3>
-                      <p className="text-[15px] leading-[145%]" style={{ color: 'rgba(32,32,32,0.55)' }}>
-                        {step.desc}
-                      </p>
-                    </div>
-                  </FadeUp>
-                )
-              })}
+                { value: '$200–$2,000', label: 'Per campaign' },
+                { value: '1M+', label: 'Active creators' },
+                { value: '$100M+', label: 'Paid out to date' },
+              ].map(s => (
+                <div key={s.label}>
+                  <div className="text-2xl md:text-3xl font-bold text-[#202020]">{s.value}</div>
+                  <div className="text-sm mt-1" style={{ color: 'rgba(32,32,32,0.55)' }}>{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Earnings */}
-        <section className="py-20 px-4 bg-[#F8FEFF]">
-          <div className="mx-auto max-w-5xl text-center">
+        {/* How it works */}
+        <section className="py-20 px-4 bg-[#FAFAFA]">
+          <div className="mx-auto max-w-4xl">
+            <FadeUp className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-[#202020]">How it works for creators</h2>
+            </FadeUp>
+            <div className="relative grid md:grid-cols-3 gap-8">
+              <div className="hidden md:block absolute top-10 left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] h-px border-t-2 border-dashed border-gray-200" />
+              {steps.map((step, i) => (
+                <FadeUp key={step.num} delay={i * 0.1}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="relative z-10 w-12 h-12 rounded-full bg-[#E0F5FF] flex items-center justify-center mb-6 shadow-sm">
+                      <span className="text-lg font-bold text-[#202020]">{step.num}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-[#202020] mb-2">{step.title}</h3>
+                    <p className="text-[14px] leading-[155%]" style={{ color: 'rgba(32,32,32,0.6)' }}>{step.desc}</p>
+                  </div>
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="py-20 px-4 bg-white">
+          <div className="mx-auto max-w-5xl">
+            <FadeUp className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-[#202020]">Everything you need to earn</h2>
+            </FadeUp>
+            <div className="grid sm:grid-cols-2 gap-6">
+              {features.map((f, i) => (
+                <FadeUp key={f.title} delay={i * 0.08}>
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:-translate-y-0.5 transition-transform duration-200">
+                    <div className="w-10 h-10 rounded-xl bg-[#E0F5FF] flex items-center justify-center mb-4">
+                      <f.icon className="w-5 h-5 text-[#202020]" />
+                    </div>
+                    <h3 className="text-base font-bold text-[#202020] mb-1.5">{f.title}</h3>
+                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(32,32,32,0.6)' }}>{f.desc}</p>
+                  </div>
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonial */}
+        <section className="py-16 px-4 bg-[#FAFAFA]">
+          <div className="mx-auto max-w-2xl">
             <FadeUp>
-              <h2 className="text-3xl font-bold text-[#202020] md:text-4xl mb-4">
-                Creators earn $200-$2,000 per campaign
-              </h2>
-              <p className="text-[15px] max-w-2xl mx-auto mb-10" style={{ color: 'rgba(32,32,32,0.55)' }}>
-                Set your own rates. No negotiation needed. Here is what active creators earned last month.
-              </p>
+              <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+                <div className="text-[80px] font-bold text-[#E0F5FF] leading-none absolute top-2 left-6 select-none">&ldquo;</div>
+                <div className="flex mb-3">
+                  {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-[16px] leading-[165%] italic text-[#202020] relative z-10 pt-2">
+                  I made $1,400 in my first month on CreatorFlow. The brands are real, the briefs are clear, and payment hit my account within 48 hours of approval.
+                </p>
+                <div className="flex items-center gap-3 mt-6">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">A</div>
+                  <div>
+                    <div className="text-sm font-bold text-[#202020]">Alicia T.</div>
+                    <div className="text-xs" style={{ color: 'rgba(32,32,32,0.55)' }}>Beauty & Lifestyle Creator, 80K followers</div>
+                  </div>
+                </div>
+              </div>
             </FadeUp>
-            <div className="grid gap-4 md:grid-cols-3">
-              {[
-                { name: 'Jessica T.', niche: 'Beauty', earnings: '$4,500' },
-                { name: 'David M.', niche: 'Tech', earnings: '$6,200' },
-                { name: 'Sarah K.', niche: 'Lifestyle', earnings: '$3,800' },
-              ].map((creator, i) => (
-                <FadeUp key={creator.name} delay={i * 0.1}>
-                  <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                    <div className="font-bold text-[#202020] text-lg">{creator.name}</div>
-                    <div className="text-[13px] text-gray-500 mb-4">{creator.niche} Creator</div>
-                    <div className="text-3xl font-bold text-emerald-600">{creator.earnings}</div>
-                    <div className="text-[12px] text-gray-400 uppercase tracking-wider mt-1">Last 30 Days</div>
-                  </div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section className="py-20 px-4 bg-white">
-          <div className="mx-auto max-w-5xl">
-            <div className="grid gap-6 md:grid-cols-2">
-              {[
-                { quote: "I replaced my full-time income in 3 months just doing UGC on CreatorFlow. The brands are amazing and payouts are super fast.", author: "Emily R.", handle: "@emilycreates" },
-                { quote: "Finally a platform that respects creators. No agency fees taking 20% of my cut. What I bid is exactly what I get paid.", author: "James W.", handle: "@jamesugc" },
-              ].map((t, i) => (
-                <FadeUp key={t.author} delay={i * 0.1}>
-                  <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100">
-                    <p className="text-lg text-[#202020] italic mb-6">"{t.quote}"</p>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600">
-                        {t.author[0]}
-                      </div>
-                      <div>
-                        <div className="font-bold text-[#202020]">{t.author}</div>
-                        <div className="text-sm text-gray-500">{t.handle}</div>
-                      </div>
-                    </div>
-                  </div>
-                </FadeUp>
-              ))}
-            </div>
           </div>
         </section>
 
         {/* Final CTA */}
-        <section className="py-24 px-4 bg-white border-t border-gray-100">
-          <div className="mx-auto max-w-2xl text-center">
+        <section className="py-20 px-4 bg-[#202020] relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(60,131,249,0.15), transparent 70%)' }} />
+          <div className="mx-auto max-w-xl text-center relative z-10">
             <FadeUp>
-              <h2 className="text-3xl font-bold text-[#202020] md:text-5xl mb-6">
-                Join 1M+ creators
-              </h2>
-              <Link
-                href="/signup/creator"
-                className="inline-flex items-center gap-2 rounded-full bg-[#202020] text-white px-8 py-4 text-lg font-bold transition-all hover:opacity-90 hover:scale-105"
+              <h2 className="text-3xl font-bold text-white md:text-4xl">Join 1M+ creators earning on CreatorFlow</h2>
+              <p className="mt-4 text-white/70 text-[15px] leading-relaxed">Free to join. No platform fees. Get paid for content you love making.</p>
+              <button
+                onClick={openRoleModal}
+                className="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-[#202020] px-8 py-4 text-base font-bold transition-all duration-200 active:scale-95 hover:opacity-90 cursor-pointer"
               >
-                Start earning today
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+                Get started free <ArrowRight className="w-5 h-5" />
+              </button>
             </FadeUp>
           </div>
         </section>
