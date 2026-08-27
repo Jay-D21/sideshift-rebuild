@@ -1,13 +1,13 @@
 'use client'
 
 import { FadeUp } from '@/components/ui/fade-up'
-import { Users, Eye, DollarSign, Building2 } from 'lucide-react'
+import Image from 'next/image'
 
 const stats = [
-  { value: '3,000+', label: 'Brands', sub: 'Active on platform', icon: Building2 },
-  { value: '1M+', label: 'Creators', sub: 'In vetted network', icon: Users },
-  { value: '5B', label: 'Views', sub: 'Generated for brands', icon: Eye },
-  { value: '$100M+', label: 'Paid Out', sub: 'To creators worldwide', icon: DollarSign },
+  { value: '3,000+', label: 'Brands', sub: 'Active on platform', img: '/images/stat_brands.jpg' },
+  { value: '1M+', label: 'Creators', sub: 'In vetted network', img: '/images/stat_creators.jpg' },
+  { value: '5B', label: 'Views', sub: 'Generated for brands', img: '/images/stat_views.jpg' },
+  { value: '$100M+', label: 'Paid Out', sub: 'To creators worldwide', img: '/images/stat_paid.jpg' },
 ]
 
 export default function Stats() {
@@ -23,7 +23,7 @@ export default function Stats() {
                   <div className="text-[14px] font-medium text-gray-500">{stat.label}</div>
                 </div>
                 <div className="h-[140px] mt-auto relative overflow-hidden bg-gray-50 border-t border-gray-100 flex items-center justify-center">
-                  <stat.icon className="w-16 h-16 text-gray-200" strokeWidth={1.5} />
+                  <Image src={stat.img} alt={stat.label} fill className="object-cover opacity-90" />
                 </div>
               </div>
             </FadeUp>

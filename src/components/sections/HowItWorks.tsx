@@ -1,13 +1,14 @@
 'use client'
 
 import { FadeUp } from '@/components/ui/fade-up'
+import { FileText, Wallet, Users, PlaySquare, CheckCircle2 } from 'lucide-react'
 
 const steps = [
-  { num: 1, title: 'Post Brief' },
-  { num: 2, title: 'Set Budget' },
-  { num: 3, title: 'Get Pitches' },
-  { num: 4, title: 'Review' },
-  { num: 5, title: 'Pay & Publish' },
+  { num: 1, title: 'Post Brief', icon: FileText },
+  { num: 2, title: 'Set Budget', icon: Wallet },
+  { num: 3, title: 'Get Pitches', icon: Users },
+  { num: 4, title: 'Review', icon: PlaySquare },
+  { num: 5, title: 'Pay & Publish', icon: CheckCircle2 },
 ]
 
 export default function HowItWorks() {
@@ -45,7 +46,9 @@ export default function HowItWorks() {
                   <div className="absolute -top-3 -right-3 text-[11px] font-bold bg-[#E0F5FF] text-[#3C83F9] rounded-full w-7 h-7 flex items-center justify-center border-2 border-white shadow-sm">
                     {step.num}
                   </div>
-                  <div className="h-12 w-12 bg-gray-50 rounded-xl mb-3 flex items-center justify-center self-center" />
+                  <div className="h-12 w-12 bg-[#F8FCFF] border border-[#DAEEFF] rounded-xl mb-3 flex items-center justify-center self-center text-[#3C83F9]">
+                    <step.icon className="w-5 h-5" />
+                  </div>
                   <h3 className="text-[13px] font-bold text-[#202020] text-center">{step.title}</h3>
                 </div>
               </FadeUp>
