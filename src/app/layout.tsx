@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'CreatorFlow — Content Creator & UGC Platform',
-  description:
-    'Connect brands with top content creators and UGC talent. Post a brief, creators apply to you.',
+  title: "CreatorFlow",
+  description: "Get 50+ qualified creator applications for your brand in 24 hours.",
   openGraph: {
     title: 'CreatorFlow — Content Creator & UGC Platform',
     description: 'Connect brands with top content creators and UGC talent.',
