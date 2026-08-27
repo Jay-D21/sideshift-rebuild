@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/types/database'
 import { Search, User, Filter, Mail, Plus } from 'lucide-react'
+import { useAuth } from '@clerk/nextjs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 export default function CreatorDiscoveryPage() {
+  const { userId } = useAuth()
   const [creators, setCreators] = useState<any[]>([])
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,19 +34,19 @@ export default function CreatorDiscoveryPage() {
       if (creatorData) setCreators(creatorData)
 
       // Load brand's active campaigns for the invite dropdown
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: brand } = await (supabase as any)
-          .from('brand_profiles')
-          .select('id')
-          .eq('user_id', user.id)
+      if (userId) {
+        const { data: profile } = await (supabase as any)
+          .from('profiles')
+          .select('id, brand_profiles(id)')
+          .eq('user_id', userId)
           .single()
           
-        if (brand) {
+        if (profile && profile.brand_profiles?.[0]?.id) {
+          const brandId = profile.brand_profiles[0].id
           const { data: camps } = await supabase
             .from('campaigns')
             .select('id, title')
-            .eq('brand_id', brand.id)
+            .eq('brand_id', brandId)
             .eq('status', 'active')
           if (camps) setCampaigns(camps)
         }
@@ -52,7 +54,7 @@ export default function CreatorDiscoveryPage() {
       setLoading(false)
     }
     load()
-  }, [supabase])
+  }, [supabase, userId])
 
   const handleInvite = async (campaignId: string) => {
     if (!selectedCreator || !campaignId) return

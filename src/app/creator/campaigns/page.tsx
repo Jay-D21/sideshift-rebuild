@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { auth } from '@clerk/nextjs/server'
 import type { Database } from '@/types/database'
 import Link from 'next/link'
 import { FileText, ArrowRight } from 'lucide-react'
@@ -17,18 +18,19 @@ export default async function MyCampaignsPage() {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { userId } = await auth()
   
   let applications = [] as any[]
   
-  if (user) {
+  if (userId) {
     const { data: creator } = await (supabase as any)
-      .from('creator_profiles')
-      .select('id')
-      .eq('user_id', user.id)
+      .from('profiles')
+      .select('id, creator_profiles(id)')
+      .eq('user_id', userId)
       .single()
 
-    if (creator) {
+    if (creator && creator.creator_profiles?.[0]?.id) {
+      const creatorId = creator.creator_profiles[0].id
       const { data } = await supabase
         .from('applications')
         .select(`

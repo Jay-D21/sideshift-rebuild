@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { auth } from '@clerk/nextjs/server'
 import type { Database } from '@/types/database'
 import Link from 'next/link'
 import { Plus, Search, MoreHorizontal } from 'lucide-react'
@@ -17,22 +18,23 @@ export default async function CampaignsPage() {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { userId } = await auth()
   
   let campaigns: Database['public']['Tables']['campaigns']['Row'][] = []
   
-  if (user) {
-    const { data: brand } = await (supabase
-      .from('brand_profiles')
-      .select('id')
-      .eq('user_id', user.id)
+  if (userId) {
+    const { data: profile } = await (supabase
+      .from('profiles')
+      .select('id, brand_profiles(id)')
+      .eq('user_id', userId)
       .single() as any)
 
-    if (brand) {
+    if (profile && profile.brand_profiles?.[0]?.id) {
+      const brandId = profile.brand_profiles[0].id
       const { data } = await supabase
         .from('campaigns')
         .select('*')
-        .eq('brand_id', brand.id)
+        .eq('brand_id', brandId)
         .order('created_at', { ascending: false })
       
       if (data) campaigns = data

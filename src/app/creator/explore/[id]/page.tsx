@@ -5,9 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/types/database'
 import Link from 'next/link'
+import { useAuth } from '@clerk/nextjs'
 import { ArrowLeft, Clock, DollarSign, CheckCircle2 } from 'lucide-react'
 
 export default function CampaignDetailPage() {
+  const { userId } = useAuth()
   const params = useParams()
   const router = useRouter()
   const [campaign, setCampaign] = useState<any>(null)
@@ -45,20 +47,19 @@ export default function CampaignDetailPage() {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (user && campaign) {
+    if (userId && campaign) {
       // Get creator ID
-      const { data: creator } = await (supabase as any)
-        .from('creator_profiles')
-        .select('id')
-        .eq('user_id', user.id)
+      const { data: profile } = await (supabase as any)
+        .from('profiles')
+        .select('id, creator_profiles(id)')
+        .eq('user_id', userId)
         .single()
         
-      if (creator) {
+      if (profile && profile.creator_profiles?.[0]?.id) {
+        const creatorId = profile.creator_profiles[0].id
         await supabase.from('applications').insert({
           campaign_id: campaign.id,
-          creator_id: creator.id,
+          creator_id: creatorId,
           status: 'pending',
           pitch,
           proposed_rate: Number(proposedRate) || campaign.budget_per_creator,

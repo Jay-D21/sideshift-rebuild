@@ -3,14 +3,17 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
+import { useAuth } from '@clerk/nextjs'
 import type { Database } from '@/types/database'
-import { ArrowLeft, ArrowRight, Save, Rocket } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Save, Rocket, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 export default function NewCampaignPage() {
   const router = useRouter()
+  const { userId } = useAuth()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [generatingBrief, setGeneratingBrief] = useState(false)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -40,6 +43,32 @@ export default function NewCampaignPage() {
     }))
   }
 
+  const handleGenerateBrief = async () => {
+    if (!formData.title || !formData.description) {
+      alert('Please fill out the Campaign Title and Description in Step 1 first!')
+      return
+    }
+    setGeneratingBrief(true)
+    try {
+      const res = await fetch('/api/generate-brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productContext: `Title: ${formData.title}\nCategory: ${formData.category}\nDescription: ${formData.description}` })
+      })
+      const data = await res.json()
+      if (res.ok && data.brief) {
+        setFormData(prev => ({ ...prev, brief: data.brief }))
+      } else {
+        alert(data.error || 'Failed to generate brief')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Something went wrong generating the brief.')
+    } finally {
+      setGeneratingBrief(false)
+    }
+  }
+
   const handleSubmit = async (status: 'draft' | 'active') => {
     setLoading(true)
     const supabase = createBrowserClient<Database>(
@@ -47,20 +76,21 @@ export default function NewCampaignPage() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    const { userId } = useAuth()
+    if (!userId) return
 
     // Get brand profile id
     const { data: brand } = await (supabase
-      .from('brand_profiles')
-      .select('id')
-      .eq('user_id', user.id)
+      .from('profiles')
+      .select('id, brand_profiles(id)')
+      .eq('user_id', userId)
       .single() as any)
 
-    if (!brand) return
+    if (!brand || !brand.brand_profiles?.[0]?.id) return
+    const brandId = brand.brand_profiles[0].id
 
     const { error } = await supabase.from('campaigns').insert({
-      brand_id: brand.id,
+      brand_id: brandId,
       title: formData.title || 'Untitled Campaign',
       category: formData.category || 'General',
       description: formData.description,
@@ -176,7 +206,17 @@ export default function NewCampaignPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#202020] mb-1">Creative Guidelines & Script (Brief)</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-[#202020]">Creative Guidelines & Script (Brief)</label>
+                <button
+                  onClick={handleGenerateBrief}
+                  disabled={generatingBrief}
+                  className="flex items-center gap-1.5 text-sm font-medium text-[#3C83F9] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors disabled:opacity-50"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {generatingBrief ? 'Generating...' : '✨ Generate with AI'}
+                </button>
+              </div>
               <textarea
                 value={formData.brief}
                 onChange={e => setFormData({...formData, brief: e.target.value})}

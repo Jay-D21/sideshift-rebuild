@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/types/database'
 import { Save, User as UserIcon } from 'lucide-react'
+import { useAuth } from '@clerk/nextjs'
 
 export default function ProfilePage() {
+  const { userId } = useAuth()
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -24,15 +26,15 @@ export default function ProfilePage() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data } = await (supabase as any)
-          .from('creator_profiles')
-          .select('*')
-          .eq('user_id', user.id)
+      if (userId) {
+        const { data: prof } = await (supabase as any)
+          .from('profiles')
+          .select('id, creator_profiles(*)')
+          .eq('user_id', userId)
           .single()
         
-        if (data) {
+        if (prof && prof.creator_profiles?.[0]) {
+          const data = prof.creator_profiles[0]
           setProfile(data)
           setFormData({
             username: data.username || '',
@@ -47,7 +49,7 @@ export default function ProfilePage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [userId])
 
   const handleSave = async () => {
     setSaving(true)
@@ -55,9 +57,8 @@ export default function ProfilePage() {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-    const { data: { user } } = await supabase.auth.getUser()
     
-    if (user && profile) {
+    if (userId && profile) {
       await (supabase as any).from('creator_profiles').update({
         username: formData.username,
         bio: formData.bio,
