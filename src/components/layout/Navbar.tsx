@@ -1,0 +1,122 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Menu, ChevronDown } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+
+const navLinks = [
+  { label: 'Platform', href: '#', hasDropdown: true },
+  { label: 'Solutions', href: '#', hasDropdown: true },
+  { label: 'Pricing', href: '/pricing', hasDropdown: false },
+  { label: 'Resources', href: '#', hasDropdown: true },
+  { label: 'For Creators', href: '/creators', hasDropdown: false },
+]
+
+export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  return (
+    <motion.header
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? 'backdrop-blur-md shadow-sm'
+          : 'bg-transparent'
+      }`}
+      style={scrolled ? {
+        background: 'linear-gradient(180deg, #E0F5FF 0%, #F0FAFF 44.95%, #FFFFFF 100%)'
+      } : {}}
+    >
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
+        {/* Logo */}
+        <Link href="/" className="text-[#202020] text-xl font-bold tracking-tight">
+          CreatorFlow
+        </Link>
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="flex items-center gap-0.5 text-base leading-[140%] font-medium text-[#202020] hover:opacity-70 transition-opacity"
+            >
+              {link.label}
+              {link.hasDropdown && <ChevronDown className="w-3.5 h-3.5 opacity-60" />}
+            </Link>
+          ))}
+        </div>
+
+        {/* Desktop CTA group */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            href="/login"
+            className="text-base leading-[140%] font-medium text-[#202020] hover:opacity-70 transition-opacity"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/demo"
+            className="rounded-full border border-[rgba(32,32,32,0.18)] px-4 py-2 text-[14px] font-bold text-[#202020] hover:bg-black/5 transition-colors"
+          >
+            Book a demo
+          </Link>
+          <Link
+            href="/signup"
+            className="rounded-full bg-[#202020] border border-[#202020] text-white px-4 py-2.5 md:px-6 md:py-3 text-[14px] md:text-base font-bold leading-[140%] whitespace-nowrap transition-all active:scale-95 hover:opacity-90"
+          >
+            Get started
+          </Link>
+        </div>
+
+        {/* Mobile hamburger */}
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger
+            className="md:hidden p-2 text-[#202020] cursor-pointer"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </SheetTrigger>
+          <SheetContent side="right" className="w-72">
+            <div className="flex flex-col gap-4 pt-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-base font-medium text-[#202020] py-2 border-b border-gray-100"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <Link href="/login" className="text-base font-medium text-[#202020] py-2">
+                Log in
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full bg-[#202020] text-white text-center px-4 py-2.5 text-[14px] font-bold"
+              >
+                Get started
+              </Link>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </nav>
+    </motion.header>
+  )
+}
