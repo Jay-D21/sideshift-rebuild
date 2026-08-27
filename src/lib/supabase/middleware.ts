@@ -33,15 +33,34 @@ export async function updateSession(request: NextRequest) {
   // Refresh the session
   const { data: { user } } = await supabase.auth.getUser()
 
-  const protectedPaths = ['/dashboard', '/creator']
-  const isProtected = protectedPaths.some(path =>
-    request.nextUrl.pathname.startsWith(path)
-  )
+  const pathname = request.nextUrl.pathname
+  
+  const isDashboardRoute = pathname.startsWith('/dashboard')
+  const isCreatorRoute = pathname.startsWith('/creator')
+  
+  const isProtected = isDashboardRoute || isCreatorRoute
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // Role-based redirects for authenticated users
+  if (user) {
+    const role = user.user_metadata?.role
+    
+    if (isDashboardRoute && role === 'creator') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/creator/explore'
+      return NextResponse.redirect(url)
+    }
+    
+    if (isCreatorRoute && role === 'brand') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse
