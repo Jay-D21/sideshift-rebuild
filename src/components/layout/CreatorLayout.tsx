@@ -1,3 +1,5 @@
+'use client'
+
 import Sidebar, { type SidebarItem } from './Sidebar'
 import {
   LayoutDashboard,
@@ -11,11 +13,10 @@ import {
 } from 'lucide-react'
 
 const creatorSidebarItems: SidebarItem[] = [
-  { label: 'Dashboard', href: '/creator', icon: LayoutDashboard },
-  { label: 'Browse Campaigns', href: '/creator/campaigns', icon: Search },
-  { label: 'My Applications', href: '/creator/applications', icon: FileText },
+  { label: 'Explore', href: '/creator/explore', icon: Search },
+  { label: 'My Campaigns', href: '/creator/campaigns', icon: FileText },
   { label: 'Messages', href: '/creator/messages', icon: MessageSquare },
-  { label: 'Earnings', href: '/creator/earnings', icon: Wallet },
+  { label: 'Wallet', href: '/creator/wallet', icon: Wallet },
   { label: 'Portfolio', href: '/creator/portfolio', icon: Star },
   { label: 'Profile', href: '/creator/profile', icon: User },
   { label: 'Settings', href: '/creator/settings', icon: Settings },
