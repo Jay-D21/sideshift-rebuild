@@ -8,10 +8,9 @@ export default function CtaBanner() {
   const { open: openRoleModal } = useRoleModal()
   return (
     <section className="py-24 px-4 bg-[#202020] relative overflow-hidden">
-      {/* Blue radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse at center, rgba(60,131,249,0.15), transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse at center, rgba(60,131,249,0.12), transparent 70%)' }}
       />
       <div className="mx-auto max-w-3xl relative z-10">
         <FadeUp className="flex flex-col items-center text-center">
@@ -32,7 +31,10 @@ export default function CtaBanner() {
             >
               Get started free <ArrowRight className="w-4 h-4" />
             </button>
-            <a href="/demo" className="rounded-full border border-white/30 px-6 py-3 text-base font-bold text-white hover:bg-white/10 transition-colors duration-150">
+            <a
+              href="/demo"
+              className="rounded-full border border-white/30 px-6 py-3 text-base font-bold text-white hover:bg-white/10 transition-colors duration-150"
+            >
               Book a demo
             </a>
           </div>

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { FadeUp } from '@/components/ui/fade-up'
-import { Check, Info } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { useState } from 'react'
 import { useRoleModal } from '@/components/ui/RoleModal'
 import {
   Accordion,
@@ -16,7 +16,7 @@ import {
 const tiers = [
   {
     name: 'Starter',
-    price: { monthly: '$199', annual: '$1,910' },
+    price: { monthly: '$99', annual: '$950' },
     desc: 'Perfect for small brands running their first UGC campaigns.',
     features: [
       'Post 1 active campaign',
@@ -116,7 +116,7 @@ export default function PricingPage() {
           <div className="grid md:grid-cols-3 gap-8 items-start">
             {tiers.map((tier, i) => (
               <FadeUp key={tier.name} delay={i * 0.1} className="h-full">
-                <div className={`relative flex flex-col h-full bg-white rounded-2xl p-8 border ${tier.popular ? 'border-[#202020] shadow-xl' : 'border-gray-200 shadow-sm'}`}>
+                <div className={`relative flex flex-col h-full rounded-2xl p-8 border ${tier.popular ? 'bg-[#E0F5FF] border-[#202020] shadow-xl' : 'bg-white border-gray-200 shadow-sm'}`}>
                   {tier.popular && (
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#202020] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
                       Most Popular
@@ -134,7 +134,7 @@ export default function PricingPage() {
                   </div>
                   <button
                     onClick={openRoleModal}
-                    className={`block text-center w-full rounded-full py-3 font-bold transition-all ${
+                    className={`block text-center w-full rounded-full py-3 font-bold transition-all cursor-pointer ${
                       tier.popular 
                         ? 'bg-[#202020] text-white hover:bg-black/80' 
                         : 'bg-gray-50 text-[#202020] border border-gray-200 hover:bg-gray-100'

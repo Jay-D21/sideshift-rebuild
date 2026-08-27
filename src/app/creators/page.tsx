@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer'
 import { FadeUp } from '@/components/ui/fade-up'
 import { ArrowRight, DollarSign, Zap, Clock, CreditCard, Star } from 'lucide-react'
 import { useRoleModal } from '@/components/ui/RoleModal'
+import Image from 'next/image'
 
 const features = [
   { icon: DollarSign, title: 'Choose Your Niches', desc: 'Tell us what you create — Tech, Beauty, Fitness, Gaming, and more. We surface campaigns that match your style.' },
@@ -25,10 +26,10 @@ export default function CreatorsPage() {
   return (
     <>
       <Navbar />
-      <main className="flex min-h-screen flex-col pt-0">
+      <main className="flex min-h-screen flex-col">
         {/* Hero */}
         <section
-          className="relative flex min-h-[75vh] flex-col items-center justify-center px-4 pt-24 pb-16 text-center"
+          className="relative flex min-h-[80vh] flex-col items-center justify-center px-4 pt-24 pb-16 text-center"
           style={{ background: 'linear-gradient(180deg, #E0F5FF 0%, #F0FAFF 44.95%, #FFFFFF 100%)' }}
         >
           <FadeUp>
@@ -37,17 +38,17 @@ export default function CreatorsPage() {
               <span className="text-[13px] font-medium text-[#202020]">1,000,000+ creators earning monthly</span>
             </div>
             <h1 className="mx-auto max-w-4xl text-[10vw] leading-[95%] font-bold tracking-[-0.05em] text-[#202020] sm:text-[52px] md:text-[64px] mt-4">
-              Earn $200&ndash;$2,000{' '}
+              Earn{' '}
               <span className="relative inline-block">
-                <span className="relative z-10">per campaign</span>
+                <span className="relative z-10">$200&ndash;$2,000</span>
                 <span className="absolute inset-x-0 bottom-1 h-3 -z-0 rounded" style={{ background: '#fdf1c7' }} />
               </span>
+              {' '}per campaign
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-[15px] leading-[145%] sm:text-lg" style={{ color: 'rgba(32,32,32,0.75)' }}>
-              Get paid to make TikToks, Reels, and Shorts for brands you love.
-              Keep 100% of your rate. No platform fees.
+              Get paid to make TikToks, Reels, and Shorts for brands you love. Keep 100% of your rate. No platform fees.
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center gap-4">
               <button
                 onClick={openRoleModal}
                 className="flex items-center gap-2 rounded-full bg-[#202020] border border-[#202020] text-white px-8 py-4 text-base font-bold leading-[140%] whitespace-nowrap transition-all duration-200 active:scale-95 hover:opacity-90 cursor-pointer"
@@ -55,6 +56,15 @@ export default function CreatorsPage() {
                 Join Free <ArrowRight className="w-5 h-5" />
               </button>
             </div>
+          </FadeUp>
+
+          {/* Creator collage */}
+          <FadeUp delay={0.2} className="mt-12 flex items-end justify-center gap-4">
+            {['/images/creator_maya.jpg','/images/creator_james.jpg','/images/creator_priya.jpg'].map((src, i) => (
+              <div key={i} className={`relative overflow-hidden rounded-2xl border-2 border-white shadow-lg ${ i === 1 ? 'h-48 w-36' : 'h-36 w-28' }`}>
+                <Image src={src} alt="Creator" fill className="object-cover" />
+              </div>
+            ))}
           </FadeUp>
         </section>
 
@@ -134,7 +144,9 @@ export default function CreatorsPage() {
                   I made $1,400 in my first month on CreatorFlow. The brands are real, the briefs are clear, and payment hit my account within 48 hours of approval.
                 </p>
                 <div className="flex items-center gap-3 mt-6">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">A</div>
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100">
+                    <Image src="/images/creator_maya.jpg" alt="Alicia T." width={40} height={40} className="w-full h-full object-cover" />
+                  </div>
                   <div>
                     <div className="text-sm font-bold text-[#202020]">Alicia T.</div>
                     <div className="text-xs" style={{ color: 'rgba(32,32,32,0.55)' }}>Beauty & Lifestyle Creator, 80K followers</div>

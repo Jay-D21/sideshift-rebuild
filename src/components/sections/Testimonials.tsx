@@ -1,29 +1,40 @@
+'use client'
+
 import { FadeUp } from '@/components/ui/fade-up'
+import Image from 'next/image'
 
 const quotes = [
   {
-    text: 'We ran a campaign with 12 creators in the first week. The content quality blew us away — better than anything our agency had delivered in 6 months.',
+    text: 'We ran a campaign with 12 creators in the first week. Content quality blew us away.',
     author: 'Priya L.',
     role: 'Brand Director, Grammarly',
-    gradient: 'from-blue-400 to-indigo-500',
+    img: '/images/creator_priya.jpg',
+    stars: 5,
   },
   {
-    text: "CreatorFlow replaced our entire outbound influencer process. Creators apply to us now. It's completely changed how we think about UGC at scale.",
+    text: 'CreatorFlow replaced our entire outbound influencer process. Creators apply to us now.',
     author: 'James M.',
     role: 'Growth Lead, Cursor',
-    gradient: 'from-emerald-400 to-teal-500',
+    img: '/images/creator_james.jpg',
+    stars: 5,
   },
   {
-    text: 'Within 24 hours of posting our brief, we had 60+ applications from creators who matched our exact niche. The pipeline view alone is worth the subscription.',
+    text: 'Within 24 hours we had 60+ applications from creators who matched our exact niche.',
     author: 'Sarah K.',
     role: 'Head of Marketing, Brex',
-    gradient: 'from-orange-400 to-pink-500',
+    img: '/images/creator_maya.jpg',
+    stars: 5,
   },
 ]
 
 export default function Testimonials() {
   return (
-    <section className="py-20 px-4 bg-white">
+    <section
+      className="py-20 px-4 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg,#FFFFFF 0%,#E0F5FF 30%,#D0EDFF 50%,#E0F5FF 70%,#FFFFFF 100%)',
+      }}
+    >
       <div className="mx-auto max-w-6xl">
         <FadeUp className="text-center mb-12">
           <h2 className="text-3xl font-bold text-[#202020] md:text-4xl">Brands love CreatorFlow</h2>
@@ -32,27 +43,44 @@ export default function Testimonials() {
           </p>
         </FadeUp>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {quotes.map((q, i) => (
-            <FadeUp key={q.author} delay={i * 0.1}>
-              <div className="relative bg-white rounded-2xl border border-gray-100 shadow-sm p-7 hover:-translate-y-0.5 transition-transform duration-200 flex flex-col">
-                {/* Giant decorative quote mark */}
-                <div className="text-[100px] font-bold text-[#E0F5FF] leading-none absolute top-2 left-5 select-none pointer-events-none">&ldquo;</div>
-                <div className="relative z-10">
-                  <p className="text-[15px] leading-[160%] italic text-[#202020] mb-6 pt-6">{q.text}</p>
-                  <div className="flex items-center gap-3 mt-auto">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${q.gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-                      {q.author.charAt(0)}
-                    </div>
+        <div className="flex flex-col md:flex-row items-end justify-center gap-6">
+          {quotes.map((q, i) => {
+            const isCenter = i === 1
+            return (
+              <FadeUp key={q.author} delay={i * 0.1}>
+                <div
+                  className={`relative overflow-hidden rounded-[2rem] border border-white/40 shadow-xl transition-transform duration-200 ${
+                    isCenter ? 'scale-105 md:scale-110 z-10' : 'hover:-translate-y-1'
+                  }`}
+                  style={{ aspectRatio: '9/16', width: '200px', maxWidth: '220px' }}
+                >
+                  {/* Full-card creator photo */}
+                  <Image
+                    src={q.img}
+                    alt={q.author}
+                    fill
+                    className="object-cover"
+                  />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  {/* Stars */}
+                  <div className="absolute top-4 left-4 flex gap-0.5">
+                    {Array.from({ length: q.stars }).map((_, si) => (
+                      <span key={si} className="text-amber-400 text-xs">★</span>
+                    ))}
+                  </div>
+                  {/* Glassmorphism quote box at bottom */}
+                  <div className="absolute bottom-4 left-3 right-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl p-3">
+                    <p className="text-white text-[11px] leading-relaxed font-medium mb-2">&ldquo;{q.text}&rdquo;</p>
                     <div>
-                      <div className="text-sm font-bold text-[#202020]">{q.author}</div>
-                      <div className="text-xs" style={{ color: 'rgba(32,32,32,0.55)' }}>{q.role}</div>
+                      <div className="text-white text-[11px] font-bold">{q.author}</div>
+                      <div className="text-white/70 text-[10px]">{q.role}</div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </FadeUp>
-          ))}
+              </FadeUp>
+            )
+          })}
         </div>
       </div>
     </section>
