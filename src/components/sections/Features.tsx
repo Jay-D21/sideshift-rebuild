@@ -1,73 +1,51 @@
 'use client'
 
 import { FadeUp } from '@/components/ui/fade-up'
-import { Megaphone, Search, FileCheck, Wallet } from 'lucide-react'
 
 const features = [
   {
-    icon: Megaphone,
     title: 'Campaign Management',
-    description:
-      'Create and manage unlimited UGC campaigns from one dashboard. Track applications, submissions, and ROI in real time.',
+    description: 'Create and manage unlimited UGC campaigns from one dashboard.',
   },
   {
-    icon: Search,
     title: 'Creator Discovery',
-    description:
-      'Search 1M+ vetted creators by niche, audience size, engagement rate, and content style. Filter by platform.',
+    description: 'Search 1M+ vetted creators by niche, audience size, and content style.',
   },
   {
-    icon: FileCheck,
     title: 'Content Review',
-    description:
-      'Review, request revisions, and approve content submissions without leaving the platform. Built-in feedback tools.',
+    description: 'Review, request revisions, and approve content submissions directly.',
   },
   {
-    icon: Wallet,
     title: 'Seamless Payouts',
-    description:
-      'Pay creators instantly on approval. Automated contracts, invoicing, and tax forms. No wire transfers.',
+    description: 'Pay creators instantly on approval with automated contracts and invoicing.',
   },
 ]
 
 export default function Features() {
   return (
-    <section className="py-20 px-4" style={{ background: '#F8FEFF' }}>
-      <div className="mx-auto max-w-5xl">
-        <FadeUp className="text-center mb-14">
-          <span className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-[#202020]">
-            Platform Features
-          </span>
-          <h2 className="mt-4 text-3xl font-bold text-[#202020] md:text-4xl">
-            One Platform for All Your UGC Campaigns
+    <section className="py-24 px-6 bg-[#F8FCFF]">
+      <div className="mx-auto max-w-6xl">
+        <FadeUp className="text-center mb-16">
+          <h2 className="text-[40px] md:text-[52px] font-bold tracking-[-0.03em] text-[#202020] leading-[1.1]">
+            One Platform for UGC
           </h2>
-          <p className="mt-3 text-[15px] leading-[145%] max-w-xl mx-auto" style={{ color: 'rgba(32,32,32,0.55)' }}>
-            Everything you need to run creator campaigns at scale — no spreadsheets, no back-and-forth.
+          <p className="mt-4 text-[17px] leading-relaxed text-[rgba(32,32,32,0.6)] max-w-2xl mx-auto">
+            Everything you need to run creator campaigns at scale.
           </p>
         </FadeUp>
 
-        <div className="grid gap-5 md:grid-cols-2">
-          {features.map((feat, i) => {
-            const Icon = feat.icon
-            return (
-              <FadeUp key={feat.title} delay={i * 0.08} className="h-full">
-                <div
-                  className="flex h-full flex-col sm:flex-row gap-4 rounded-lg border border-gray-100 bg-white p-6 transition-transform hover:-translate-y-0.5"
-                  style={{ boxShadow: '0 2px 12px rgba(32,32,32,0.05)' }}
-                >
-                  <div className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-lg bg-[#E0F5FF]">
-                    <Icon className="h-5 w-5 text-[#3C83F9]" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-[#202020] mb-1.5">{feat.title}</h3>
-                    <p className="text-[15px] leading-[145%]" style={{ color: 'rgba(32,32,32,0.55)' }}>
-                      {feat.description}
-                    </p>
-                  </div>
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {features.map((feat, i) => (
+            <FadeUp key={feat.title} delay={i * 0.1}>
+              <div className="rounded-2xl bg-white border border-gray-100 p-8 flex flex-col overflow-hidden h-full min-h-[320px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-200">
+                <h3 className="text-[18px] font-bold text-[#202020]">{feat.title}</h3>
+                <p className="text-[15px] text-gray-500 mt-2 leading-relaxed">{feat.description}</p>
+                <div className="flex-1 mt-8 bg-gray-50 border border-gray-100 rounded-xl relative overflow-hidden flex items-center justify-center">
+                   <div className="text-gray-300 text-sm font-medium">Dashboard Mockup</div>
                 </div>
-              </FadeUp>
-            )
-          })}
+              </div>
+            </FadeUp>
+          ))}
         </div>
       </div>
     </section>

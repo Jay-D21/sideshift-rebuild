@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { Menu, ChevronDown } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { SignInButton, Show, UserButton } from '@clerk/nextjs'
@@ -54,29 +54,29 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 h-16 ${
         scrolled ? 'backdrop-blur-md shadow-sm' : 'bg-transparent'
       }`}
       style={scrolled ? { background: 'linear-gradient(180deg,#E0F5FF 0%,#F0FAFF 44.95%,#FFFFFF 100%)' } : {}}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
-        <Link href="/" className="text-[#202020] text-xl font-bold tracking-tight flex-shrink-0">
+      <nav className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
+        <Link href="/" className="text-[#202020] text-[20px] font-bold tracking-tight flex-shrink-0">
           CreatorFlow
         </Link>
 
-        {/* Desktop links with HOVER dropdowns */}
-        <div className="hidden md:flex items-center gap-6">
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-6 h-full">
           {navItems.map((item) => (
-            <div key={item.label} className="relative group">
+            <div key={item.label} className="relative group h-full flex items-center">
               {item.hasDropdown ? (
-                <button className="flex items-center gap-0.5 text-base font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors duration-150 cursor-pointer py-2">
+                <button className="flex items-center gap-0.5 text-[15px] font-medium text-[rgba(32,32,32,0.7)] hover:text-[#202020] transition-colors duration-150 cursor-pointer">
                   {item.label}
                   <ChevronDown className="w-3.5 h-3.5 opacity-60 transition-transform duration-200 group-hover:rotate-180" />
                 </button>
               ) : (
                 <Link
                   href={item.href!}
-                  className="text-base font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors duration-150 py-2 block"
+                  className="text-[15px] font-medium text-[rgba(32,32,32,0.7)] hover:text-[#202020] transition-colors duration-150"
                 >
                   {item.label}
                 </Link>
@@ -84,10 +84,9 @@ export default function Navbar() {
 
               {/* Hover Dropdown */}
               {item.hasDropdown && (
-                <div className="absolute top-full left-0 pt-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 z-50">
-                  {/* Invisible bridge to prevent gap between trigger and dropdown */}
-                  <div className="absolute -top-2 left-0 right-0 h-3" />
-                  <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-2 min-w-[240px]">
+                <div className="absolute top-14 left-0 pt-1 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 z-50">
+                  <div className="absolute -top-3 left-0 right-0 h-4" />
+                  <div className="bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100 p-2 min-w-[240px]">
                     {dropdownContent[item.label].map((entry) => (
                       <button
                         key={entry.title}
@@ -108,22 +107,22 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <button className="text-base font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors duration-150 cursor-pointer">
+              <button className="text-[15px] font-medium text-[rgba(32,32,32,0.7)] hover:text-[#202020] transition-colors duration-150 cursor-pointer mr-2">
                 Log in
               </button>
             </SignInButton>
-            <Link href="/demo" className="rounded-full border border-[rgba(32,32,32,0.18)] px-4 py-2 text-[14px] font-bold text-[#202020] hover:bg-black/5 transition-colors duration-150">
+            <Link href="/demo" className="rounded-full border border-[rgba(32,32,32,0.2)] px-4 py-2 text-[14px] font-semibold text-[#202020] hover:bg-black/5 transition-colors duration-150">
               Book a demo
             </Link>
             <button
               onClick={openRoleModal}
-              className="rounded-full bg-[#202020] text-white px-5 py-2.5 text-[14px] font-bold leading-[140%] transition-all duration-200 active:scale-95 hover:opacity-90 cursor-pointer"
+              className="rounded-full bg-[#202020] text-white px-5 py-2.5 text-[14px] font-bold transition-all duration-200 active:scale-95 hover:opacity-90 cursor-pointer"
             >
               Get started
             </button>
           </Show>
           <Show when="signed-in">
-            <Link href="/dashboard" className="text-base font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors duration-150">
+            <Link href="/dashboard" className="text-[15px] font-medium text-[rgba(32,32,32,0.7)] hover:text-[#202020] transition-colors duration-150 mr-4">
               Dashboard
             </Link>
             <UserButton />
