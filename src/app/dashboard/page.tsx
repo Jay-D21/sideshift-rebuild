@@ -1,52 +1,68 @@
+﻿import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import type { Database } from '@/types/database'
 import Link from 'next/link'
 import { Plus, Users, Play, DollarSign, Activity } from 'lucide-react'
 
 export default async function DashboardPage() {
+  const { userId } = await auth()
   const cookieStore = await cookies()
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll() {} // Read-only on server components
-      }
-    }
+    { cookies: { getAll() { return cookieStore.getAll() }, setAll() {} } }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  // Get brand profile to resolve to their campaigns
-  let brandId = null
-  if (user) {
-    const { data: brand } = await (supabase
-      .from('brand_profiles')
-      .select('id, company_name')
-      .eq('user_id', user.id)
-      .single() as any)
-    if (brand) brandId = brand.id
+  // Get profile -> brand_profile -> campaigns
+  let brandId: string | null = null
+  if (userId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (profile) {
+      const { data: brand } = await supabase
+        .from('brand_profiles')
+        .select('id')
+        .eq('profile_id', profile.id)
+        .single()
+      if (brand) brandId = brand.id
+    }
   }
 
-  // Aggregate stats (mock data or real if you want to query)
   let activeCampaigns = 0
-  
+  let totalApplicants = 0
+  let creatorsHired = 0
+
   if (brandId) {
-    const { count } = await supabase
+    const { count: ac } = await supabase
       .from('campaigns')
       .select('*', { count: 'exact', head: true })
       .eq('brand_id', brandId)
       .eq('status', 'active')
-    activeCampaigns = count || 0
+    activeCampaigns = ac ?? 0
+
+    const { count: ta } = await supabase
+      .from('applications')
+      .select('*, campaigns!inner(brand_id)', { count: 'exact', head: true })
+      .eq('campaigns.brand_id', brandId)
+    totalApplicants = ta ?? 0
+
+    const { count: ch } = await supabase
+      .from('applications')
+      .select('*, campaigns!inner(brand_id)', { count: 'exact', head: true })
+      .eq('campaigns.brand_id', brandId)
+      .eq('status', 'hired')
+    creatorsHired = ch ?? 0
   }
 
   const stats = [
-    { label: 'Active Campaigns', value: activeCampaigns.toString(), icon: Play, trend: '+1 this week' },
-    { label: 'Total Applicants', value: '12', icon: Users, trend: '+4 today' },
-    { label: 'Creators Hired', value: '3', icon: Activity, trend: '2 pending review' },
-    { label: 'Total Spent', value: '$1,250', icon: DollarSign, trend: 'Across 2 campaigns' },
+    { label: 'Active Campaigns', value: activeCampaigns.toString(), icon: Play, trend: 'Running now' },
+    { label: 'Total Applicants', value: totalApplicants.toString(), icon: Users, trend: 'Across all campaigns' },
+    { label: 'Creators Hired', value: creatorsHired.toString(), icon: Activity, trend: 'Currently working' },
+    { label: 'Total Spent', value: '$0', icon: DollarSign, trend: 'Lifetime spend' },
   ]
 
   return (
@@ -54,9 +70,9 @@ export default async function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#202020]">Overview</h1>
-          <p className="text-sm text-gray-500 mt-1">Welcome back. Here's what's happening with your campaigns.</p>
+          <p className="text-sm text-gray-500 mt-1">Welcome back. Here&apos;s what&apos;s happening with your campaigns.</p>
         </div>
-        <Link 
+        <Link
           href="/dashboard/campaigns/new"
           className="inline-flex items-center gap-2 bg-[#202020] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-black/90 transition-colors"
         >
@@ -66,7 +82,7 @@ export default async function DashboardPage() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map(stat => (
-          <div key={stat.label} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <div key={stat.label} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:-translate-y-0.5 transition-transform">
             <div className="flex items-center gap-3 mb-3">
               <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center">
                 <stat.icon className="h-4 w-4 text-gray-600" />
@@ -87,7 +103,7 @@ export default async function DashboardPage() {
           </div>
           <h3 className="text-sm font-bold text-[#202020]">No activity yet</h3>
           <p className="text-sm text-gray-500 mt-1 max-w-xs">
-            When creators apply to your campaigns or submit content, you'll see it here.
+            When creators apply to your campaigns or submit content, you&apos;ll see it here.
           </p>
         </div>
       </div>

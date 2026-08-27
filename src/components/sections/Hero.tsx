@@ -1,11 +1,39 @@
-'use client'
+﻿'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+import { SignUpButton } from '@clerk/nextjs'
+
+const testimonials = [
+  {
+    quote: 'We got 60+ creator applications in under 12 hours.',
+    highlight: '60+ creator applications',
+    author: 'Sarah K., Head of Marketing at Brex',
+  },
+  {
+    quote: 'The quality of UGC creators on CreatorFlow is unmatched.',
+    highlight: 'quality of UGC creators',
+    author: 'James M., Cursor Growth Team',
+  },
+  {
+    quote: 'Replaced our entire influencer agency in one week.',
+    highlight: 'entire influencer agency',
+    author: 'Priya L., Brand Director at Grammarly',
+  },
+]
 
 export default function Hero() {
-  const [email, setEmail] = useState('')
+  const [quoteIndex, setQuoteIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setQuoteIndex(i => (i + 1) % testimonials.length)
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const current = testimonials[quoteIndex]
 
   return (
     <section
@@ -57,26 +85,19 @@ export default function Hero() {
         No cold outreach. No agencies. Just results.
       </motion.p>
 
-      {/* Input + CTA */}
+      {/* CTA */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row"
+        className="mt-8"
       >
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your work email"
-          className="min-h-[54px] flex-1 rounded-full border border-[rgba(32,32,32,0.18)] bg-white px-5 text-[16px] text-[#202020] shadow-[0_1px_2px_rgba(32,32,32,0.05)] outline-none placeholder:text-[rgba(32,32,32,0.4)] focus:border-[rgba(32,32,32,0.4)]"
-        />
-        <button
-          className="flex min-h-[54px] items-center justify-center gap-2 rounded-full bg-[#202020] border border-[#202020] text-white px-6 text-base font-bold leading-[140%] whitespace-nowrap transition-all active:scale-95 hover:opacity-90 cursor-pointer"
-        >
-          Launch my campaign
-          <ArrowRight className="w-4 h-4" />
-        </button>
+        <SignUpButton mode="modal">
+          <button className="flex min-h-[54px] items-center justify-center gap-2 rounded-full bg-[#202020] border border-[#202020] text-white px-8 text-base font-bold leading-[140%] whitespace-nowrap transition-all active:scale-95 hover:opacity-90 cursor-pointer">
+            Launch my campaign
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </SignUpButton>
       </motion.div>
 
       {/* Fine print */}
@@ -90,14 +111,45 @@ export default function Hero() {
         7 days free &middot; $0 today &middot; Cancel anytime
       </motion.p>
 
-      {/* Social proof */}
+      {/* Rotating testimonials */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
-        className="mt-8 flex items-center justify-center gap-3"
+        className="mt-8 w-full max-w-md"
       >
-        {/* Avatar stack */}
+        <div className="relative h-16 overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={quoteIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              className="absolute inset-0 flex flex-col items-center justify-center text-center"
+            >
+              <p className="text-[13px] text-[rgba(32,32,32,0.7)] leading-relaxed">
+                &ldquo;{current.quote.split(current.highlight).map((part, i) => (
+                  i === 0 ? (
+                    <span key={i}>{part}<mark className="bg-[#fdf1c7] text-[#202020] not-italic px-0.5 rounded-sm">{current.highlight}</mark></span>
+                  ) : (
+                    <span key={i}>{part}</span>
+                  )
+                ))}&rdquo;
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1 font-medium">{current.author}</p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
+      {/* Social proof */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.55 }}
+        className="mt-6 flex items-center justify-center gap-3"
+      >
         <div className="flex -space-x-2">
           {['A', 'B', 'C', 'D', 'E'].map((letter, i) => (
             <div

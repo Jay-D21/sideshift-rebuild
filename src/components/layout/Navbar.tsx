@@ -9,6 +9,12 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import {
+  SignInButton,
+  SignUpButton,
+  Show,
+  UserButton,
+} from '@clerk/nextjs'
 
 const navLinks = [
   { label: 'Platform', href: '#', hasDropdown: true },
@@ -54,7 +60,7 @@ export default function Navbar() {
             <Link
               key={link.label}
               href={link.href}
-              className="flex items-center gap-0.5 text-base leading-[140%] font-medium text-[#202020] hover:opacity-70 transition-opacity"
+              className="flex items-center gap-0.5 text-base leading-[140%] font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors"
             >
               {link.label}
               {link.hasDropdown && <ChevronDown className="w-3.5 h-3.5 opacity-60" />}
@@ -64,24 +70,33 @@ export default function Navbar() {
 
         {/* Desktop CTA group */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-base leading-[140%] font-medium text-[#202020] hover:opacity-70 transition-opacity"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/demo"
-            className="rounded-full border border-[rgba(32,32,32,0.18)] px-4 py-2 text-[14px] font-bold text-[#202020] hover:bg-black/5 transition-colors"
-          >
-            Book a demo
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-full bg-[#202020] border border-[#202020] text-white px-4 py-2.5 md:px-6 md:py-3 text-[14px] md:text-base font-bold leading-[140%] whitespace-nowrap transition-all active:scale-95 hover:opacity-90"
-          >
-            Get started
-          </Link>
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button className="text-base leading-[140%] font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors cursor-pointer">
+                Log in
+              </button>
+            </SignInButton>
+            <Link
+              href="/demo"
+              className="rounded-full border border-[rgba(32,32,32,0.18)] px-4 py-2 text-[14px] font-bold text-[#202020] hover:bg-black/5 transition-colors"
+            >
+              Book a demo
+            </Link>
+            <SignUpButton mode="modal">
+              <button className="rounded-full bg-[#202020] border border-[#202020] text-white px-4 py-2.5 md:px-6 md:py-3 text-[14px] md:text-base font-bold leading-[140%] whitespace-nowrap transition-all active:scale-95 hover:opacity-90 cursor-pointer">
+                Get started
+              </button>
+            </SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <Link
+              href="/dashboard"
+              className="text-base leading-[140%] font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors"
+            >
+              Dashboard
+            </Link>
+            <UserButton />
+          </Show>
         </div>
 
         {/* Mobile hamburger */}
@@ -98,21 +113,33 @@ export default function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-base font-medium text-[#202020] py-2 border-b border-gray-100"
+                  className="text-base font-medium text-[rgba(32,32,32,0.75)] hover:text-[#202020] transition-colors py-2 border-b border-gray-100"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Link href="/login" className="text-base font-medium text-[#202020] py-2">
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-full bg-[#202020] text-white text-center px-4 py-2.5 text-[14px] font-bold"
-              >
-                Get started
-              </Link>
+              <Show when="signed-out">
+                <SignInButton mode="modal">
+                  <button className="text-base font-medium text-[#202020] py-2 text-left cursor-pointer">
+                    Log in
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="rounded-full bg-[#202020] text-white text-center px-4 py-2.5 text-[14px] font-bold w-full cursor-pointer">
+                    Get started
+                  </button>
+                </SignUpButton>
+              </Show>
+              <Show when="signed-in">
+                <Link href="/dashboard" className="text-base font-medium text-[#202020] py-2" onClick={() => setMobileOpen(false)}>
+                  Dashboard
+                </Link>
+                <div className="flex items-center gap-2">
+                  <UserButton />
+                  <span className="text-sm text-gray-500">My account</span>
+                </div>
+              </Show>
             </div>
           </SheetContent>
         </Sheet>

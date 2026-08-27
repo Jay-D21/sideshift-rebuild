@@ -1,6 +1,7 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
+import { ClerkProvider } from '@clerk/nextjs'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "CreatorFlow",
-  description: "Get 50+ qualified creator applications for your brand in 24 hours.",
+  title: 'CreatorFlow',
+  description: 'Get 50+ qualified creator applications for your brand in 24 hours.',
   openGraph: {
     title: 'CreatorFlow — Content Creator & UGC Platform',
     description: 'Connect brands with top content creators and UGC talent.',
@@ -29,7 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-[#202020] font-sans">
-        {children}
+        <ClerkProvider>
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   )
