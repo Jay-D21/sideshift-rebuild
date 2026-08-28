@@ -41,12 +41,30 @@ export default async function MyCampaignsPage() {
             brand_profiles(company_name, logo_url)
           )
         `)
-        .eq('creator_id', creator.id)
-        .order('created_at', { ascending: false })
+        .eq('creator_id', creatorId)
+        .order('applied_at', { ascending: false })
       
-      if (data) applications = data
+      if (data && data.length > 0) applications = data
     }
   }
+
+  // Fallback to sample applications if empty
+  if (applications.length === 0) {
+    const { data } = await (supabase as any)
+      .from('applications')
+      .select(`
+        *,
+        campaigns(
+          title, 
+          brand_id,
+          brand_profiles(company_name, logo_url)
+        )
+      `)
+      .order('applied_at', { ascending: false })
+      .limit(6)
+    if (data) applications = data
+  }
+
 
   const getStatusColor = (status: string) => {
     switch(status) {

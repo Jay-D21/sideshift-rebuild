@@ -104,7 +104,7 @@ export default function ProfilePage() {
             </div>
             <h2 className="font-bold text-lg text-[#202020]">@{formData.username || 'username'}</h2>
             <div className="text-sm text-gray-500 mb-4 mt-1">
-              {profile?.categories?.length ? profile.categories.join(' • ') : 'No niches set'}
+              {Array.isArray(profile?.categories) && profile.categories.length ? profile.categories.join(' • ') : 'No niches set'}
             </div>
             
             <div className="w-full pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">

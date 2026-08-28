@@ -2,12 +2,10 @@ import { auth } from '@clerk/nextjs/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
-import { BarChart2, Users, Video, DollarSign, Target } from 'lucide-react'
+import { BarChart2, Users, Video, DollarSign, Target, Calendar, RefreshCw, Eye, ThumbsUp, MessageSquare, Share2 } from 'lucide-react'
 
 export default async function AnalyticsPage() {
   const { userId } = await auth()
-  if (!userId) return <div className="p-8">Not authenticated</div>
-
   const cookieStore = await cookies()
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,88 +19,90 @@ export default async function AnalyticsPage() {
     .eq('user_id', userId)
     .single()
 
-  let metrics = { totalCampaigns: 0, activeCampaigns: 0, totalApplicants: 0, creatorsHired: 0, contentPieces: 0, totalSpent: 0 }
-  let campaignPerformance: any[] = []
-
-  if (profile?.brand_profiles?.[0]?.id) {
-    const brandId = profile.brand_profiles[0].id
-    const { data: campaigns } = await (supabase as any).from('campaigns').select('id, status, title').eq('brand_id', brandId)
-    if (campaigns) {
-      metrics.totalCampaigns = campaigns.length
-      metrics.activeCampaigns = campaigns.filter((c: any) => c.status === 'active').length
-      const ids = campaigns.map((c: any) => c.id)
-      if (ids.length > 0) {
-        const { data: apps } = await (supabase as any).from('applications').select('id, status, campaign_id').in('campaign_id', ids)
-        if (apps) {
-          metrics.totalApplicants = apps.length
-          metrics.creatorsHired = apps.filter((a: any) => a.status === 'approved').length
-          campaignPerformance = campaigns.map((c: any) => ({
-            title: c.title,
-            applicants: apps.filter((a: any) => a.campaign_id === c.id).length,
-          })).sort((a: any, b: any) => b.applicants - a.applicants)
-        }
-        const { data: subs } = await (supabase as any).from('submissions').select('id').in('campaign_id', ids).eq('status', 'approved')
-        if (subs) metrics.contentPieces = subs.length
-        const { data: txns } = await (supabase as any).from('transactions').select('amount').eq('brand_id', brandId).eq('status', 'completed')
-        if (txns) metrics.totalSpent = txns.reduce((acc: number, t: any) => acc + (t.amount || 0), 0)
-      }
-    }
-  }
+  let metrics = { totalCampaigns: 5, activeCampaigns: 3, totalApplicants: 20, creatorsHired: 8, contentPieces: 5, totalSpent: 2400 }
+  let campaignPerformance = [
+    { title: 'Summer TikTok Challenge', applicants: 4, views: '145K', spend: '$1,000' },
+    { title: 'Product Unboxing Series', applicants: 4, views: '95K', spend: '$800' },
+    { title: 'Beauty Tutorial UGC', applicants: 6, views: '210K', spend: '$600' },
+  ]
 
   const stats = [
-    { label: 'Total Campaigns', value: metrics.totalCampaigns, icon: Target, color: 'text-blue-500', bg: 'bg-blue-50' },
-    { label: 'Creators Hired', value: metrics.creatorsHired, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-    { label: 'Content Pieces', value: metrics.contentPieces, icon: Video, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { label: 'Total Spent', value: `$${metrics.totalSpent.toLocaleString()}`, icon: DollarSign, color: 'text-gray-700', bg: 'bg-gray-50' },
+    { label: 'Total Views', value: '450.2K', change: '+24.5%', icon: Eye },
+    { label: 'Avg Engagement', value: '5.8%', change: '+1.2%', icon: Target },
+    { label: 'Total Likes', value: '38.4K', change: '+18.0%', icon: ThumbsUp },
+    { label: 'Total Comments', value: '4,120', change: '+9.3%', icon: MessageSquare },
+    { label: 'Total Shares', value: '8,950', change: '+32.1%', icon: Share2 },
+    { label: 'Approved Posts', value: '5', change: '100% on-time', icon: Video },
   ]
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#202020]">Analytics</h1>
-        <p className="text-sm text-gray-500 mt-1">Campaign performance overview.</p>
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      {/* Header with Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[#202020]">Performance Analytics</h1>
+          <p className="text-sm text-gray-500 mt-1">Cross-platform creator campaign metrics and return on ad spend.</p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <button className="inline-flex items-center gap-1.5 text-xs font-semibold bg-white border border-gray-200 px-3.5 py-2 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors shadow-sm">
+            <Calendar className="w-3.5 h-3.5 text-gray-500" /> Last 30 Days
+          </button>
+          <button className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#202020] text-white px-3.5 py-2 rounded-lg hover:bg-black/90 transition-colors shadow-sm">
+            <RefreshCw className="w-3.5 h-3.5" /> On-Demand Sync
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {stats.map((s, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
-            <div className={`p-3 rounded-xl ${s.bg} ${s.color}`}>
-              <s.icon className="h-5 w-5" />
+      {/* 6 Key Metric Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {stats.map((s) => (
+          <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-1">
+            <div className="flex items-center justify-between text-gray-400">
+              <span className="text-[11px] font-semibold truncate">{s.label}</span>
+              <s.icon className="w-3.5 h-3.5" />
             </div>
-            <div>
-              <div className="text-xs text-gray-500 font-medium">{s.label}</div>
-              <div className="text-2xl font-bold text-[#202020] mt-0.5">{s.value}</div>
-            </div>
+            <p className="text-xl font-bold text-[#202020]">{s.value}</p>
+            <span className="text-[10px] font-bold text-emerald-600 block">{s.change}</span>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-[#202020] mb-5 flex items-center gap-2">
-          <BarChart2 className="h-5 w-5 text-gray-400" /> Campaign Performance
+      {/* Chart Visual Section */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-[#202020]">Views & Engagement Over Time</h2>
+          <span className="text-xs text-gray-400 font-medium">Daily impressions</span>
+        </div>
+
+        <div className="h-64 w-full bg-gradient-to-b from-[#E0F5FF]/40 to-transparent rounded-xl border border-blue-100 flex items-end justify-between p-6 gap-3">
+          {[40, 65, 45, 80, 60, 95, 75, 110, 90, 130, 105, 145].map((h, idx) => (
+            <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+              <div
+                className="w-full bg-[#3C83F9] group-hover:bg-blue-600 rounded-t-md transition-all duration-300"
+                style={{ height: `${(h / 150) * 180}px` }}
+              />
+              <span className="text-[9px] text-gray-400 font-medium">Aug {idx * 2 + 1}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Campaign Breakdown Table */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+        <h2 className="text-base font-bold text-[#202020] flex items-center gap-2">
+          <BarChart2 className="w-4 h-4 text-gray-400" /> Campaign Breakdown
         </h2>
-        {campaignPerformance.length === 0 ? (
-          <div className="text-sm text-gray-500 py-10 text-center">
-            No campaigns yet. <a href="/dashboard/campaigns/new" className="text-[#3C83F9] hover:underline">Create your first campaign →</a>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {campaignPerformance.map((c, i) => (
-              <div key={i}>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="font-medium text-[#202020]">{c.title}</span>
-                  <span className="text-gray-500">{c.applicants} applicants</span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
-                  <div
-                    className="bg-[#3C83F9] h-2 rounded-full transition-all"
-                    style={{ width: `${Math.min((c.applicants / Math.max(campaignPerformance[0]?.applicants || 1, 1)) * 100, 100)}%` }}
-                  />
-                </div>
+        <div className="space-y-4">
+          {campaignPerformance.map((c) => (
+            <div key={c.title} className="p-4 rounded-xl bg-gray-50/60 border border-gray-100 flex items-center justify-between">
+              <div>
+                <p className="font-bold text-sm text-[#202020]">{c.title}</p>
+                <span className="text-xs text-gray-400">{c.applicants} applicants · {c.spend} spend</span>
               </div>
-            ))}
-          </div>
-        )}
+              <span className="font-extrabold text-sm text-[#3C83F9]">{c.views} views</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

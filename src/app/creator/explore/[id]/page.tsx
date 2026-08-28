@@ -60,7 +60,7 @@ export default function CampaignDetailPage() {
         await supabase.from('applications').insert({
           campaign_id: campaign.id,
           creator_id: creatorId,
-          status: 'pending',
+          status: 'applied',
           pitch,
           proposed_rate: Number(proposedRate) || campaign.budget_per_creator,
         } as any)
