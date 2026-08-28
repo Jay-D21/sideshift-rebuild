@@ -1,37 +1,74 @@
-'use client'
-
-import { useState } from 'react'
+import { auth } from '@clerk/nextjs/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { Flame, Star, Trophy, Sparkles, CheckCircle2, ArrowRight, Video, TrendingUp, DollarSign, Wallet } from 'lucide-react'
+import { Flame, Star, Trophy, Sparkles, ArrowRight } from 'lucide-react'
+import CreatorHomeClient from './CreatorHomeClient'
 
-export default function CreatorHomePage() {
-  const [tasks, setTasks] = useState([
-    { id: 'gigs', title: 'Get started applying to gigs', xp: '+22 XP', done: false, desc: '3 campaign matches (98%, 96%, 88%) ready for you' },
-    { id: 'socials', title: 'Fill in: TikTok, Instagram', xp: '+10 XP', done: true, desc: 'Verify your reach to unlock premium gigs' },
-    { id: 'training', title: 'Start your training', xp: '+15 XP', done: false, desc: 'Complete the 60s creator onboarding module' },
-  ])
+export default async function CreatorHomePage() {
+  const { userId } = await auth()
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() }, setAll() {} } }
+  )
 
-  const toggleTask = (id: string) => {
-    setTasks(ts => ts.map(t => t.id === id ? { ...t, done: !t.done } : t))
+  let creatorId: string | null = null
+  let totalEarned = 0
+  let campaigns: { id: string; title: string; budget: number; brand: string; deliverables: string }[] = []
+
+  if (userId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    if (profile) {
+      const { data: cp } = await (supabase as any)
+        .from('creator_profiles')
+        .select('id')
+        .eq('profile_id', profile.id)
+        .single()
+      if (cp) creatorId = cp.id
+    }
   }
 
-  const leaderboard = [
-    { rank: 1, name: 'Alex Rivera', handle: 'alextechtok', earned: '$28,000', badge: '👑' },
-    { rank: 2, name: 'Jordan Gaming', handle: 'jordangaming', earned: '$22,000', badge: '🥈' },
-    { rank: 3, name: 'Lucas Finance', handle: 'lucasfinance', earned: '$20,000', badge: '🥉' },
-    { rank: 4, name: 'Priya Style', handle: 'priyastyle', earned: '$18,500', badge: '⭐' },
-    { rank: 5, name: 'Kai Travel', handle: 'kaitravel', earned: '$15,000', badge: '⭐' },
-  ]
+  if (creatorId) {
+    // Total earned from completed payouts
+    const { data: txns } = await (supabase as any)
+      .from('transactions')
+      .select('amount')
+      .eq('creator_id', creatorId)
+      .eq('status', 'completed')
+      .eq('type', 'payout')
+    if (txns) totalEarned = txns.reduce((sum: number, t: any) => sum + (t.amount ?? 0), 0)
 
-  const weekDays = [
-    { day: 'Su', active: false },
-    { day: 'Mo', active: false },
-    { day: 'Tu', active: false },
-    { day: 'We', active: false },
-    { day: 'Th', active: false },
-    { day: 'Fr', active: true },
-    { day: 'Sa', active: false },
-  ]
+    // Active campaigns the creator can apply to (open status)
+    const { data: openCampaigns } = await (supabase as any)
+      .from('campaigns')
+      .select('id, title, budget, deliverables, brand_profiles(brand_name)')
+      .eq('status', 'active')
+      .limit(4)
+
+    if (openCampaigns) {
+      campaigns = openCampaigns.map((c: any) => ({
+        id: c.id,
+        title: c.title,
+        budget: c.budget ?? 0,
+        brand: c.brand_profiles?.brand_name ?? 'Brand',
+        deliverables: c.deliverables ?? '',
+      }))
+    }
+  }
+
+  const milestoneGoal = 100
+  const progressPct = Math.min(100, totalEarned > 0 ? Math.round((totalEarned / milestoneGoal) * 100) : 0)
+  const firstMilestone = totalEarned < 1 ? 1 : milestoneGoal
+
+  const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+  const todayIdx = new Date().getDay()
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -52,11 +89,10 @@ export default function CreatorHomePage() {
         </Link>
       </div>
 
-      {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column (Span 2) */}
+        {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Earnings Card */}
+          {/* Earnings */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">What you've earned</span>
@@ -65,67 +101,29 @@ export default function CreatorHomePage() {
               </Link>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold text-[#202020]">$0.00</span>
+              <span className="text-4xl font-extrabold text-[#202020]">
+                ${totalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
               <span className="text-xs text-gray-400 font-medium">USD</span>
             </div>
-
-            {/* Goal Progress Bar */}
             <div className="space-y-1.5 pt-2">
               <div className="flex justify-between text-xs text-gray-500 font-medium">
-                <span>First milestone: $1.00</span>
-                <span>0% to goal</span>
+                <span>First milestone: ${firstMilestone.toFixed(2)}</span>
+                <span>{progressPct}% to goal</span>
               </div>
               <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 w-[5%] rounded-full" />
+                <div
+                  className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all"
+                  style={{ width: `${Math.max(2, progressPct)}%` }}
+                />
               </div>
             </div>
           </div>
 
-          {/* Gamified Daily Plan */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-[#202020] flex items-center gap-2">
-                <Star className="w-4 h-4 text-orange-500 fill-orange-500" />
-                Here's your plan today!
-              </h2>
-              <span className="text-xs font-semibold bg-orange-50 text-orange-600 px-2.5 py-1 rounded-full">
-                47 XP Available
-              </span>
-            </div>
+          {/* Daily tasks — interactive, handled by client wrapper */}
+          <CreatorHomeClient hasProfile={!!creatorId} />
 
-            <div className="space-y-3">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  onClick={() => toggleTask(task.id)}
-                  className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-3.5 ${
-                    task.done
-                      ? 'bg-emerald-50/40 border-emerald-200 opacity-75'
-                      : 'bg-gray-50/60 border-gray-200 hover:border-orange-300'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-md border mt-0.5 flex items-center justify-center transition-colors ${
-                    task.done ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-gray-300 bg-white'
-                  }`}>
-                    {task.done && <CheckCircle2 className="w-4 h-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className={`text-sm font-bold ${task.done ? 'line-through text-gray-500' : 'text-[#202020]'}`}>
-                        {task.title}
-                      </p>
-                      <span className="text-xs font-bold text-orange-600 bg-orange-100/80 px-2 py-0.5 rounded-full shrink-0">
-                        {task.xp}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">{task.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* High Match Gigs Preview */}
+          {/* Campaign Matches */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-[#202020]">Top Campaign Matches For You</h2>
@@ -134,47 +132,40 @@ export default function CreatorHomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                    98% Match
-                  </span>
-                  <span className="text-xs font-bold text-[#202020]">$500</span>
-                </div>
-                <h3 className="font-bold text-xs text-[#202020]">Summer TikTok Challenge</h3>
-                <p className="text-[11px] text-gray-500">TechStartup Inc · 3x 30s TikTok videos</p>
-                <Link
-                  href="/creator/explore"
-                  className="mt-2 block text-center text-xs font-bold bg-white border border-gray-200 hover:bg-black hover:text-white py-1.5 rounded-lg transition-colors"
-                >
-                  Apply Now
+            {campaigns.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-sm font-medium text-gray-400">No campaigns available right now</p>
+                <p className="text-xs text-gray-400 mt-1">Check back soon — new gigs are posted daily.</p>
+                <Link href="/creator/explore" className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline">
+                  Browse explore <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
-
-              <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">
-                    96% Match
-                  </span>
-                  <span className="text-xs font-bold text-[#202020]">$600</span>
-                </div>
-                <h3 className="font-bold text-xs text-[#202020]">Beauty Tutorial UGC</h3>
-                <p className="text-[11px] text-gray-500">GlowBeauty Co · 2x tutorial videos</p>
-                <Link
-                  href="/creator/explore"
-                  className="mt-2 block text-center text-xs font-bold bg-white border border-gray-200 hover:bg-black hover:text-white py-1.5 rounded-lg transition-colors"
-                >
-                  Apply Now
-                </Link>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {campaigns.map((c) => (
+                  <div key={c.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Active</span>
+                      <span className="text-xs font-bold text-[#202020]">${c.budget.toLocaleString()}</span>
+                    </div>
+                    <h3 className="font-bold text-xs text-[#202020]">{c.title}</h3>
+                    <p className="text-[11px] text-gray-500">{c.brand}{c.deliverables ? ` · ${c.deliverables}` : ''}</p>
+                    <Link
+                      href={`/creator/explore/${c.id}`}
+                      className="mt-2 block text-center text-xs font-bold bg-white border border-gray-200 hover:bg-black hover:text-white py-1.5 rounded-lg transition-colors"
+                    >
+                      Apply Now
+                    </Link>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column (Span 1) */}
+        {/* Right column */}
         <div className="space-y-6">
-          {/* Streak Card */}
+          {/* Streak */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -183,23 +174,21 @@ export default function CreatorHomePage() {
               </div>
               <span className="text-[11px] text-gray-400">Log in daily</span>
             </div>
-
-            {/* Week days */}
             <div className="flex justify-between items-center pt-2">
-              {weekDays.map((d, idx) => (
+              {weekDays.map((day, idx) => (
                 <div key={idx} className="flex flex-col items-center gap-1.5">
-                  <span className="text-[10px] font-medium text-gray-400">{d.day}</span>
+                  <span className="text-[10px] font-medium text-gray-400">{day}</span>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                    d.active ? 'bg-orange-500 text-white shadow' : 'bg-gray-100 text-gray-500'
+                    idx === todayIdx ? 'bg-orange-500 text-white shadow' : 'bg-gray-100 text-gray-500'
                   }`}>
-                    {d.active ? '🔥' : '·'}
+                    {idx === todayIdx ? '🔥' : '·'}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Leaderboard Card */}
+          {/* Leaderboard — illustrative (platform-wide top earners) */}
           <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -210,26 +199,35 @@ export default function CreatorHomePage() {
             </div>
 
             <div className="space-y-2.5 divide-y divide-gray-100">
-              {leaderboard.map((user) => (
-                <div key={user.rank} className="pt-2 flex items-center justify-between text-xs">
+              {[
+                { badge: '👑', name: 'Alex Rivera', handle: 'alextechtok', earned: '$28,000' },
+                { badge: '🥈', name: 'Jordan Gaming', handle: 'jordangaming', earned: '$22,000' },
+                { badge: '🥉', name: 'Lucas Finance', handle: 'lucasfinance', earned: '$20,000' },
+                { badge: '⭐', name: 'Priya Style', handle: 'priyastyle', earned: '$18,500' },
+                { badge: '⭐', name: 'Kai Travel', handle: 'kaitravel', earned: '$15,000' },
+              ].map((u, i) => (
+                <div key={i} className="pt-2 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2.5">
-                    <span className="font-bold text-sm w-4 text-gray-400">{user.badge}</span>
+                    <span className="font-bold text-sm w-4 text-gray-400">{u.badge}</span>
                     <div>
-                      <p className="font-bold text-[#202020]">{user.name}</p>
-                      <p className="text-[10px] text-gray-400">@{user.handle}</p>
+                      <p className="font-bold text-[#202020]">{u.name}</p>
+                      <p className="text-[10px] text-gray-400">@{u.handle}</p>
                     </div>
                   </div>
-                  <span className="font-extrabold text-emerald-600">{user.earned}</span>
+                  <span className="font-extrabold text-emerald-600">{u.earned}</span>
                 </div>
               ))}
             </div>
 
+            {/* Current user's position */}
             <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs bg-orange-50/60 p-3 rounded-xl border border-orange-200/50">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-xs text-orange-700">#42</span>
+                <span className="font-bold text-xs text-orange-700">#–</span>
                 <span className="font-bold text-[#202020]">You</span>
               </div>
-              <span className="font-bold text-[#202020]">$0.00</span>
+              <span className="font-bold text-[#202020]">
+                ${totalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
             </div>
           </div>
         </div>
